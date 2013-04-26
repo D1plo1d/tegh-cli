@@ -12,6 +12,7 @@
     , "glob": "*"
     , "request": "*"
     , "mdns": "*"
+    , "websocket": "*"
     , "keypress": "*"
     , "ansi": "*"
     , "colors": "*"

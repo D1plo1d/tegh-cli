@@ -7,13 +7,14 @@ colors = require 'colors'
 ansi = require 'ansi'
 tty = require 'tty'
 
+stdin = process.stdin
+
 module.exports = class ServiceSelector extends EventEmitter
 
   constructor: () ->
     @services = new ConstructDiscoverer()
     @selected_index = 0
     @cursor = ansi(process.stdout)
-    stdin = process.stdin
     stdin.setRawMode(true)
     stdin.resume()
     stdin.setEncoding( 'utf8' )
@@ -60,3 +61,5 @@ module.exports = class ServiceSelector extends EventEmitter
       @render()
     if key.name == "enter"
       @emit("select", @services.list[@selected_index])
+      stdin.removeListener 'keypress', @onKeyPress
+

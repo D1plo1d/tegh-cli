@@ -10,9 +10,11 @@ color = require 'colors'
 ConstructClient = require './construct/client'
 ServiceSelector = require './service_selector'
 
-
 stdout = process.stdout
 stdin = process.stdin
+
+clear = -> `util.print("\u001b[2J\u001b[0;0f")`
+
 
 class CliConsole
   constructor: (@src) ->
@@ -36,9 +38,11 @@ class CliConsole
   render: =>
     stdin.pause()
     @updateSize()
-    `util.print("\u001b[2J\u001b[0;0f")`
+    clear()
 
     @cursor.black().bg.white()
+    console.log "wut?"
+    console.log @src._header()
     @cursor.write(@src._header())
     @cursor.reset().bg.reset()
 
@@ -51,9 +55,13 @@ class CliConsole
 class QueueTea
   commands:
     help:
-      description: "display help text"
+      description: """
+        display help text
+      """
     exit:
-      description: "exit the console"
+      description: """
+        exit the console (note: this does *not* stop the printer)
+      """
     move:
       description: """
         move the printer either a fixed distance (default) or 
@@ -111,16 +119,34 @@ class QueueTea
 
 
   constructor: ->
-    #new ServiceSelector().on "select", @_onServiceSelect
+    new ServiceSelector().on "select", @_onServiceSelect
     #@_onServiceSelect()
     @_logLines = []
-    @cli = new CliConsole(@)
-    @client = new ConstructClient(@)
+    @_sensors = {}
+
 
   _onServiceSelect: (service) =>
-    console.log "moo"
+    clear()
+    stdout.write "Connecting to #{service.addresses.first()}:#{service.port}..."
+    @client = new ConstructClient(service.addresses.first(), service.port)
+      .on("connect", @_onConnect)
+      .on("sensor_changed", @_onSensorChanged)
+    # @client = new ConstructClient(service.host[0..-2], service.port)
 
-  _header: -> "Extruder 0: 120\u00B0  Bed: 120\u00B0  \n"
+  _onConnect: =>
+    @cli = new CliConsole(@)
+
+  _onSensorChanged: (data) =>
+    @_sensors[data.name] = data.value
+    console.log @_sensors
+    @cli.render()
+
+  _header: ->
+    fields = []
+    for k, v of @_sensors
+      fields.push "#{k.capitalize()}: #{v}\u00B0C"
+    fields.join("  ") + "\n"
+    fields.join("  ") + "\n"
 
   _log: (height) =>
     log = ""
@@ -139,7 +165,6 @@ class QueueTea
 
       @_logLines.shift() if @_logLines.length >= @cli.height
       @_logLines.push(prefix + line)
-
 
   _parseLine: (line) =>
     line = line.toString()
@@ -160,7 +185,7 @@ class QueueTea
     help = """
       Help
       #{"".padLeft("-", 80)}
-      The following commands are available on your printer.
+      The following commands are available on your printer:\n\n
     """
     # The following commands are available on your printer,
     # to learn more about a specific command type help <CMD>\n\n
@@ -170,7 +195,9 @@ class QueueTea
       desc = data.description.split("\n")
       help += "- #{cmd.padRight(" ", 12 - cmd.length)} - #{desc.shift()}\n"
       help += "#{d.padLeft(" ", 12+5)}\n" for d in desc
+    @_append("")
     @_append(help)
+    @_append("")
 
   _autocomplete: (line) =>
     out = []
@@ -178,10 +205,12 @@ class QueueTea
     if words.length == 1
       for cmd, data of @commands
         out.push cmd if cmd.indexOf(line) == 0
+      out[0] = out[0] + " " if out.length == 1
 
-    else if words[0] == "add_job"
-      out = glob(words[1..].join(" ")+"*", sync: true)
+    if words[0] == "add_job"
+      out = glob((words[1..]||[""]).join(" ")+"*", sync: true)
       out[0] = "add_job #{out[0]}" if out.length == 1
+
     return [out, line]
 
 new QueueTea()
