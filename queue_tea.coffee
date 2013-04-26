@@ -2,9 +2,11 @@ EventEmitter = require('events').EventEmitter
 util = require 'util'
 keypress = require 'keypress'
 require 'sugar'
-colors = require 'colors'
-ansi = require 'ansi'
+glob = require 'glob'
 tty = require 'tty'
+ansi = require 'ansi'
+readline = require 'readline'
+color = require 'colors'
 ConstructClient = require './construct/client'
 ServiceSelector = require './service_selector'
 
@@ -16,13 +18,20 @@ class CliConsole
   constructor: (@src) ->
     @cursor = ansi(stdout)
     @render()
+    @_line = ""
     stdout.on 'resize', @render
-    stdin.on 'data', @src._parseLine
+    stdin = process.stdin
+    rl = readline.createInterface
+      input: stdin,
+      output: stdout
+      completer: @src._autocomplete
+    rl.setPrompt("\r> ".green, 2)
+    rl.on("line", @src._parseLine)
+    process.on 'exit', -> stdout.write("\n")
 
   updateSize: ->
     @width = stdout.columns
     @height = stdout.rows-2
-
 
   render: =>
     stdin.pause()
@@ -41,6 +50,10 @@ class CliConsole
 
 class QueueTea
   commands:
+    help:
+      description: "display help text"
+    exit:
+      description: "exit the console"
     move:
       description: """
         move the printer either a fixed distance (default) or 
@@ -65,7 +78,7 @@ class QueueTea
         "Start heating the primary (0th) extruder to 220 degrees celcius": "set e: 220"
         "Start heating the bed to 100 degrees celcius": "set b: 100"
         "Turn off the extruder's heater (unless it's bellow freezing)": "set e: 0"
-    e_stop:
+    estop:
       description: """
         Emergency stop. Stop all dangerous printer activity
         immediately.
@@ -137,6 +150,7 @@ class QueueTea
     words = line.split(/\s/)[0]
     cmd = words.shift()
     if cmd == "help" then @_appendHelp()
+    else if cmd == "exit" then return process.exit()
     else if @commands[cmd]? then @client.send(line)
     else
       "Syntax Error: #{cmd} is not a valid command. Try typing 'help' for help."
@@ -157,5 +171,17 @@ class QueueTea
       help += "- #{cmd.padRight(" ", 12 - cmd.length)} - #{desc.shift()}\n"
       help += "#{d.padLeft(" ", 12+5)}\n" for d in desc
     @_append(help)
+
+  _autocomplete: (line) =>
+    out = []
+    words = line.split(" ")
+    if words.length == 1
+      for cmd, data of @commands
+        out.push cmd if cmd.indexOf(line) == 0
+
+    else if words[0] == "add_job"
+      out = glob(words[1..].join(" ")+"*", sync: true)
+      out[0] = "add_job #{out[0]}" if out.length == 1
+    return [out, line]
 
 new QueueTea()

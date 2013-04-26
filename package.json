@@ -13,8 +13,8 @@
     , "request": "*"
     , "mdns": "*"
     , "keypress": "*"
-    , "colors": "*"
     , "ansi": "*"
+    , "colors": "*"
   },
   "engines": {
     "node": "~0.8.x",
