@@ -12,12 +12,12 @@ module.exports = class ConstructClient extends EventEmitter
     url = "ws://#{@host}:#{@port}/socket?user=admin&password=admin"
     @socket.connect url, "construct.text.0.0.1"
 
-  send: (msg) ->
-    connection.sendUTF msg
+  send: (msg) =>
+    @connection.sendUTF msg
 
-  _onConnect: (connection) =>
-    @emit "connect", connection
-    connection.on 'message', @_onMessage
+  _onConnect: (@connection) =>
+    @emit "connect", @connection
+    @connection.on 'message', @_onMessage
 
   _onConnectionFailed: (error) =>
     stdout.write 'Connect Error: ' + error.toString() + "\n"

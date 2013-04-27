@@ -84,34 +84,26 @@ class CliConsole
   constructor: (@src) ->
     @cursor = ansi(stdout)
     clear()
-    @updateSize()
     @render(false)
-    @_line = ""
-    @_prompt = "\r> ".green
-    stdout.on 'resize', @render
     stdin = process.stdin
-    output = new Stream()
-    output.writable = true
-    output.write = (ch) =>
-      @_line += ch
 
-      stdout.write(ch)
-      #@render()
-
-    output.end = -> null
-
-    rl = readline.createInterface
+    @rl = readline.createInterface
       input: stdin
-      output: stdout#output #stdout
+      output: stdout
       completer: @src._autocomplete
       terminal: true
-    rl.setPrompt("> ", 2)
-    rl.prompt()
-    rl.on "line", (line) =>
+
+    @rl.setPrompt("> ", 2)
+    @rl.prompt()
+
+    @rl.on "line", @_onLine
+    process.on 'exit', -> stdout.write("\n")
+    stdout.on 'resize', @render
+
+  _onLine: (line) =>
       @src._parseLine(line)
       @render(false)
-      rl.prompt()
-    process.on 'exit', -> stdout.write("\n")
+      @rl.prompt()
 
   updateSize: ->
     @width = stdout.columns
@@ -120,18 +112,17 @@ class CliConsole
   render: (restore = true) =>
     stdin.pause()
     @updateSize()
-    #clear()
 
     header = @src._header()
+    c = @cursor
 
-    @cursor.savePosition().goto(0, 0)
-    @cursor.black().bg.white()
-    @cursor.write(header.padRight(" ", @width - header.length))
-    @cursor.reset().bg.reset()
+    c.savePosition().goto(0, 0)
+    c.black().bg.white()
+    c.write(header.padRight(" ", @width - header.length))
+    c.reset().bg.reset()
 
-    @cursor.goto(0, @height+2)
-    @cursor.show()
-    @cursor.restorePosition() if restore
+    c.goto(0, @height+2).show()
+    c.restorePosition() if restore
     stdin.resume()
 
 
@@ -175,7 +166,10 @@ class QueueTea
     else if cmd == "exit" then return process.exit()
     else if @commands[cmd]? then @client.send(line)
     else
-      "Syntax Error: #{cmd} is not a valid command. Try typing 'help' for help."
+      @_append """
+        Error: '#{cmd}' is not a valid command.
+        Try typing 'help' for more info.
+      """
     @cli.render()
 
   _appendHelp: ->
