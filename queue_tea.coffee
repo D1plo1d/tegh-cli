@@ -129,10 +129,6 @@ class CliConsole
     @cursor.write(header.padRight(" ", @width - header.length))
     @cursor.reset().bg.reset()
 
-    # for i, line in @src._log(@height).split("\n")
-    #   @cursor.goto(0, i+1)
-    #   #@cursor.write(line)
-
     @cursor.goto(0, @height+2)
     @cursor.show()
     @cursor.restorePosition() if restore
@@ -144,8 +140,6 @@ class QueueTea
 
   constructor: ->
     new ServiceSelector().on "select", @_onServiceSelect
-    #@_onServiceSelect()
-    @_logLines = []
     @_sensors = {}
 
 
@@ -170,29 +164,11 @@ class QueueTea
       fields.push "#{k.capitalize()}: #{v}\u00B0C"
     fields.join("  ")
 
-  _log: (height) =>
-    log = ""
-    blankLines = height - @_logLines.length - 1
-
-    if blankLines < 0
-      @_logLines = @_logLines[0..height-1]
-    else
-      log += "\n" for i in [0..blankLines]
-
-    log += @_logLines.join("\n") + "\n" if @_logLines.length > 0
-    return log
-
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
-    # for line in s.trim().split("\n")
-
-    #   @_logLines.shift() if @_logLines.length >= @cli.height
-    #   @_logLines.push(prefix + line)
 
   _parseLine: (line) =>
     line = line.toString()
-    #console.log line
-    #@_append(line, "> ")
     words = line.split(/\s/)[0]
     cmd = words.shift()
     if cmd == "help" then @_appendHelp()
