@@ -61,3 +61,7 @@ module.exports =
     """
     required_args: ["job_id"]
     optional_args: ["qty", "position"]
+  get_jobs:
+    description: """
+      Gets a list of the jobs in the printer's queue.
+    """
