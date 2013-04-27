@@ -9,114 +9,138 @@ readline = require 'readline'
 color = require 'colors'
 ConstructClient = require './construct/client'
 ServiceSelector = require './service_selector'
+Stream = require 'stream'
 
 stdout = process.stdout
 stdin = process.stdin
 
 clear = -> `util.print("\u001b[2J\u001b[0;0f")`
 
+commands =
+  help:
+    description: """
+      display help text
+    """
+  exit:
+    description: """
+      exit the console (note: this does *not* stop the printer)
+    """
+  move:
+    description: """
+      move the printer either a fixed distance (default) or 
+      until stopped (via ++ or -- values).
+    """
+    optional_args: ["continuous", "x", "y", "z"]
+    examples:
+      "move the y axis forward until stopped": "move y: ++"
+      "move the y axis backward until stopped": "move y: --"
+      "move the x axis 10mm to the right": "move x: 10"
+  stop_move:
+    description: """
+      stop all axes of the printer
+    """
+  set:
+    description: """
+      sets the target temperature(s) of the printer's extruder(s)
+      or bed
+    """
+    optional_args: ["e", "e0", "e1", "e2", "b"]
+    examples:
+      "Start heating the primary (0th) extruder to 220 degrees celcius": "set e: 220"
+      "Start heating the bed to 100 degrees celcius": "set b: 100"
+      "Turn off the extruder's heater (unless it's bellow freezing)": "set e: 0"
+  estop:
+    description: """
+      Emergency stop. Stop all dangerous printer activity
+      immediately.
+    """
+  print:
+    description: """
+      Start or resume printing this printer's queued print jobs.
+    """
+  pause_print:
+    description: """
+      Pause the current print job (not necessarily immediately).
+    """
+  add_job:
+    description: """
+      Add a print job to the end of the printer's queue.
+    """
+    required_args: ["file"]
+    optional_args: ["qty"]
+  rm_job:
+    description: """
+      Remove a print job from the printer's queue by it's ID.
+    """
+    required_args: ["job_id"]
+  change_job:
+    description: """
+      Change a print job's quantity or position in the queue.
+    """
+    required_args: ["job_id"]
+    optional_args: ["qty", "position"]
 
 class CliConsole
   constructor: (@src) ->
     @cursor = ansi(stdout)
-    @render()
+    clear()
+    @updateSize()
+    @render(false)
     @_line = ""
+    @_prompt = "\r> ".green
     stdout.on 'resize', @render
     stdin = process.stdin
+    output = new Stream()
+    output.writable = true
+    output.write = (ch) =>
+      @_line += ch
+
+      stdout.write(ch)
+      #@render()
+
+    output.end = -> null
+
     rl = readline.createInterface
-      input: stdin,
-      output: stdout
+      input: stdin
+      output: stdout#output #stdout
       completer: @src._autocomplete
-    rl.setPrompt("\r> ".green, 2)
-    rl.on("line", @src._parseLine)
+      terminal: true
+    rl.setPrompt("> ", 2)
+    rl.prompt()
+    rl.on "line", (line) =>
+      @src._parseLine(line)
+      @render(false)
+      rl.prompt()
     process.on 'exit', -> stdout.write("\n")
 
   updateSize: ->
     @width = stdout.columns
     @height = stdout.rows-2
 
-  render: =>
+  render: (restore = true) =>
     stdin.pause()
     @updateSize()
-    clear()
+    #clear()
 
+    header = @src._header()
+
+    @cursor.savePosition().goto(0, 0)
     @cursor.black().bg.white()
-    console.log "wut?"
-    console.log @src._header()
-    @cursor.write(@src._header())
+    @cursor.write(header.padRight(" ", @width - header.length))
     @cursor.reset().bg.reset()
 
-    @cursor.write(@src._log(@height))
+    # for i, line in @src._log(@height).split("\n")
+    #   @cursor.goto(0, i+1)
+    #   #@cursor.write(line)
 
-    @cursor.show().green().write("\r> ").reset()
+    @cursor.goto(0, @height+2)
+    @cursor.show()
+    @cursor.restorePosition() if restore
     stdin.resume()
 
 
 class QueueTea
-  commands:
-    help:
-      description: """
-        display help text
-      """
-    exit:
-      description: """
-        exit the console (note: this does *not* stop the printer)
-      """
-    move:
-      description: """
-        move the printer either a fixed distance (default) or 
-        until stopped (via ++ or -- values).
-      """
-      optional_args: ["continuous", "x", "y", "z"]
-      examples:
-        "move the y axis forward until stopped": "move y: ++"
-        "move the y axis backward until stopped": "move y: --"
-        "move the x axis 10mm to the right": "move x: 10"
-    stop_move:
-      description: """
-        stop all axes of the printer
-      """
-    set:
-      description: """
-        sets the target temperature(s) of the printer's extruder(s)
-        or bed
-      """
-      optional_args: ["e", "e0", "e1", "e2", "b"]
-      examples:
-        "Start heating the primary (0th) extruder to 220 degrees celcius": "set e: 220"
-        "Start heating the bed to 100 degrees celcius": "set b: 100"
-        "Turn off the extruder's heater (unless it's bellow freezing)": "set e: 0"
-    estop:
-      description: """
-        Emergency stop. Stop all dangerous printer activity
-        immediately.
-      """
-    print:
-      description: """
-        Start or resume printing this printer's queued print jobs.
-      """
-    pause_print:
-      description: """
-        Pause the current print job (not necessarily immediately).
-      """
-    add_job:
-      description: """
-        Add a print job to the end of the printer's queue.
-      """
-      required_args: ["file"]
-      optional_args: ["qty"]
-    rm_job:
-      description: """
-        Remove a print job from the printer's queue by it's ID.
-      """
-      required_args: ["job_id"]
-    change_job:
-      description: """
-        Change a print job's quantity or position in the queue.
-      """
-      required_args: ["job_id"]
-      optional_args: ["qty", "position"]
-
+  commands: commands
 
   constructor: ->
     new ServiceSelector().on "select", @_onServiceSelect
@@ -138,15 +162,13 @@ class QueueTea
 
   _onSensorChanged: (data) =>
     @_sensors[data.name] = data.value
-    console.log @_sensors
     @cli.render()
 
   _header: ->
     fields = []
     for k, v of @_sensors
       fields.push "#{k.capitalize()}: #{v}\u00B0C"
-    fields.join("  ") + "\n"
-    fields.join("  ") + "\n"
+    fields.join("  ")
 
   _log: (height) =>
     log = ""
@@ -161,17 +183,16 @@ class QueueTea
     return log
 
   _append: (s, prefix = "") ->
-    for line in s.trim().split("\n")
+    stdout.write(prefix + s + "\n")
+    # for line in s.trim().split("\n")
 
-      @_logLines.shift() if @_logLines.length >= @cli.height
-      @_logLines.push(prefix + line)
+    #   @_logLines.shift() if @_logLines.length >= @cli.height
+    #   @_logLines.push(prefix + line)
 
   _parseLine: (line) =>
     line = line.toString()
-    console.log line
-    @_append(line, "> ")
-    # ctrl-c ( end of text )
-    #process.exit() if ( key == '\u0003' )
+    #console.log line
+    #@_append(line, "> ")
     words = line.split(/\s/)[0]
     cmd = words.shift()
     if cmd == "help" then @_appendHelp()

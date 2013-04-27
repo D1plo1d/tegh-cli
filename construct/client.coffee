@@ -10,9 +10,10 @@ module.exports = class ConstructClient extends EventEmitter
     @socket.on 'connectFailed', @_onConnectionFailed
     #new WebSocketClient "ws://#{@host}:8000/#{@port}", "construct"
     url = "ws://#{@host}:#{@port}/socket?user=admin&password=admin"
-    @socket.connect url, "construct.text.0.1"
+    @socket.connect url, "construct.text.0.0.1"
 
-  send: ->
+  send: (msg) ->
+    connection.sendUTF msg
 
   _onConnect: (connection) =>
     @emit "connect", connection
