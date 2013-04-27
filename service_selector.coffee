@@ -59,7 +59,9 @@ module.exports = class ServiceSelector extends EventEmitter
     if ["up", "down"].indexOf(key.name) > -1
       @selected_index += if key.name == "up" then -1 else +1
       @render()
-    if key.name == "enter"
+    if key.name == "enter" and @services.list.length > 0
       @emit("select", @services.list[@selected_index])
       stdin.removeListener 'keypress', @onKeyPress
+      for k in ["Up", "Down"]
+        @services.removeListener("service#{k}", @render)
 

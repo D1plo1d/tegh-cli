@@ -18,6 +18,7 @@ module.exports = class ConstructClient extends EventEmitter
   _onConnect: (@connection) =>
     @emit "connect", @connection
     @connection.on 'message', @_onMessage
+    @connection.on 'close', @_onClose
 
   _onConnectionFailed: (error) =>
     stdout.write 'Connect Error: ' + error.toString() + "\n"
@@ -27,4 +28,7 @@ module.exports = class ConstructClient extends EventEmitter
     message = JSON.parse m.utf8Data
     @emit "message", message
     @emit k, v for k,v of message
+
+  _onClose: () =>
+    @emit "close"
     

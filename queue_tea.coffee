@@ -70,6 +70,7 @@ class QueueTea
     @client = new ConstructClient(service.addresses.first(), service.port)
       .on("connect", @_onConnect)
       .on("sensor_changed", @_onSensorChanged)
+      .on("close", @_onClose)
     # @client = new ConstructClient(service.host[0..-2], service.port)
 
   _onConnect: =>
@@ -78,6 +79,10 @@ class QueueTea
   _onSensorChanged: (data) =>
     @_sensors[data.name] = data.value
     @cli.render()
+
+  _onClose: =>
+    console.log("Server disconnected.")
+    process.exit()
 
   _header: ->
     fields = []

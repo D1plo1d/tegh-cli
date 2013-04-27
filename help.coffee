@@ -7,6 +7,16 @@ module.exports =
     description: """
       exit the console (note: this does *not* stop the printer)
     """
+  home:
+    description: """
+      home the printer's axes. Specifing individual axes will 
+      only home those axes.
+    """
+    optional_args: ["x", "y", "z"]
+    examples:
+      "move the y axis forward until stopped": "move y: ++"
+      "move the y axis backward until stopped": "move y: --"
+      "move the x axis 10mm to the right": "move x: 10"
   move:
     description: """
       move the printer either a fixed distance (default) or 
