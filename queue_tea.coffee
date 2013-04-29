@@ -6,13 +6,20 @@ ansi = require 'ansi'
 readline = require 'readline'
 ConstructClient = require './construct/client'
 ServiceSelector = require './service_selector'
+fs = require "fs-extra"
+touch = require "touch"
 
 stdout = process.stdout
 stdin = process.stdin
 
 clear = -> `util.print("\u001b[2J\u001b[0;0f")`
 
+getUserHome = ->
+  process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
+
 class CliConsole
+  historyPath: "#{getUserHome()}/.construct_history"
+
   constructor: (@src) ->
     @cursor = ansi(stdout)
     @rl = readline.createInterface
@@ -21,19 +28,27 @@ class CliConsole
       completer: @src._autocomplete
       terminal: true
 
+    # loading the user's readline history
+    touch.sync @historyPath
+    @rl.history = (fs.readFileSync(@historyPath)).toString().split("\n")
+
     clear()
     @render(false)
     @rl.setPrompt("> ", 2)
     @rl.prompt()
 
     @rl.on "line", @_onLine
-    process.on 'exit', -> stdout.write("\n")
+    process.on 'exit', @_onExit
     stdout.on 'resize', @render
 
   _onLine: (line) =>
-      @src._parseLine(line)
-      @render(false)
-      @rl.prompt()
+    @src._parseLine(line)
+    @render(false)
+    @rl.prompt()
+
+  _onExit: =>
+    fs.writeFileSync @historyPath, @rl.history.join("\n")
+    stdout.write("\n")
 
   updateSize: ->
     @width = stdout.columns
