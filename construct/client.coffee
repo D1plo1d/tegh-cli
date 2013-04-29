@@ -27,7 +27,9 @@ module.exports = class ConstructClient extends EventEmitter
   _onMessage: (m) =>
     message = JSON.parse m.utf8Data
     @emit "message", message
-    @emit k, v for k,v of message
+    for k,v of message
+      k = "construct_#{k}" if k == "error"
+      @emit k, v
 
   _onClose: () =>
     @emit "close"
