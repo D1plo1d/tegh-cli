@@ -64,7 +64,7 @@ module.exports = class ServiceSelector extends EventEmitter
 
   onKeyData: ( key ) ->
     # ctrl-c ( end of text )
-    process.exit() if ( key == '\u0003' )
+    process.exit() if ( key == '\u0003' or key == `'\4'` )
 
   stop: () =>
     stdin._emitKeypress = false
