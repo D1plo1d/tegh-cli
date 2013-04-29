@@ -20,7 +20,7 @@ module.exports =
   move:
     description: """
       move the printer either a fixed distance (default) or 
-      until stopped (via ++ or -- values).
+      until stopped (via ++ or -- values, if available).
     """
     optional_args: ["continuous", "x", "y", "z"]
     examples:

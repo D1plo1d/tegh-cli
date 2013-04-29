@@ -8,6 +8,7 @@ ConstructClient = require './construct/client'
 ServiceSelector = require './service_selector'
 fs = require "fs-extra"
 touch = require "touch"
+path = require ("flavored-path")
 
 stdout = process.stdout
 stdin = process.stdin
@@ -100,6 +101,8 @@ class QueueTea
     @client = new ConstructClient(service.addresses.first(), service.port)
       .on("connect", @_onConnect)
       .on("sensor_changed", @_onSensorChanged)
+      .on("jobs", @_onJobsList)
+      .on("job_upload_complete", @_onJobUploadComplete)
       .on("close", @_onClose)
     # @client = new ConstructClient(service.host[0..-2], service.port)
 
@@ -113,6 +116,27 @@ class QueueTea
   _onClose: =>
     console.log("Server disconnected.")
     process.exit()
+
+  _onJobsList: (jobs) =>
+    @cli.rl.pause()
+    stdout.write("\r")
+    console.log "Print Jobs:\n"
+    for job, i in jobs
+      console.log "  #{i} ) #{job.original_file_name}"
+    console.log ""
+    @cli.rl.prompt()
+    @cli.rl.resume()
+
+  _onJobUploadComplete: (statusCode) =>
+      @cli.rl.pause()
+      if statusCode = 200
+        status = "Job added."
+      else
+        status = "Error adding job."
+      process.stdout.write("\r" + status + "\n")
+      @cli.rl.prompt()
+      @cli.rl.resume()
+
 
   _header: ->
     fields = []
@@ -164,8 +188,17 @@ class QueueTea
       out[0] = out[0] + " " if out.length == 1
 
     if words[0] == "add_job"
-      out = glob((words[1..]||[""]).join(" ")+"*", sync: true)
-      out[0] = "add_job #{out[0]}" if out.length == 1
+      # Creating a glob to find files that start with the path
+      # the user is building.
+      relative = (words[1]||"").indexOf("~") == 0
+      globPath = (words[1..]||[""]).join(" ") + "*"
+      globPath = path.get globPath if relative
+
+      out = glob(globPath, sync: true)
+
+      if out.length == 1
+        @cli.rl.line = "add_job /" if relative
+        out[0] = "add_job #{out[0]}"
 
     return [out, line]
 
