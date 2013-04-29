@@ -22,6 +22,7 @@ class CliConsole
 
   constructor: (@src) ->
     @cursor = ansi(stdout)
+
     @rl = readline.createInterface
       input: stdin
       output: stdout
@@ -38,13 +39,26 @@ class CliConsole
     @rl.prompt()
 
     @rl.on "line", @_onLine
+    @rl.on 'SIGINT', @_onSIGINT
     process.on 'exit', @_onExit
     stdout.on 'resize', @render
+    stdin.on 'data', @_onData
 
   _onLine: (line) =>
     @src._parseLine(line)
     @render(false)
     @rl.prompt()
+
+  _onSIGINT: =>
+    if @rl.line == ""
+      process.exit()
+    else
+      stdout.write("\n")
+      @rl.line = ""
+      @rl.prompt()
+
+  _onData: (char) =>
+    process.exit() if char == `'\4'`
 
   _onExit: =>
     fs.writeFileSync @historyPath, @rl.history.join("\n")
@@ -77,6 +91,7 @@ class QueueTea
   constructor: ->
     new ServiceSelector().on "select", @_onServiceSelect
     @_sensors = {}
+
 
 
   _onServiceSelect: (service) =>

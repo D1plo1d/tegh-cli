@@ -19,15 +19,14 @@ module.exports = class ServiceSelector extends EventEmitter
     stdin.resume()
     stdin.setEncoding( 'utf8' )
     keypress(stdin)
-    stdin.on 'data', ( key ) ->
-      # ctrl-c ( end of text )
-      process.exit() if ( key == '\u0003' )
 
+    stdin.on 'data', @onKeyData
     stdin.on 'keypress', @onKeyPress
 
     for k in ["Up", "Down"]
       @services.on("service#{k}", @render)
     @render()
+
 
   render: =>
     # Update the services menu
@@ -60,8 +59,19 @@ module.exports = class ServiceSelector extends EventEmitter
       @selected_index += if key.name == "up" then -1 else +1
       @render()
     if key.name == "enter" and @services.list.length > 0
+      @stop()
       @emit("select", @services.list[@selected_index])
-      stdin.removeListener 'keypress', @onKeyPress
-      for k in ["Up", "Down"]
-        @services.removeListener("service#{k}", @render)
+
+  onKeyData: ( key ) ->
+    # ctrl-c ( end of text )
+    process.exit() if ( key == '\u0003' )
+
+  stop: () =>
+    stdin._emitKeypress = false
+    stdin.removeListener 'keypress', @onKeyPress
+    stdin.removeAllListeners 'data'
+    stdin.setRawMode(false)
+    stdin.resume()
+    for k in ["Up", "Down"]
+      @services.removeListener("service#{k}", @render)
 

@@ -30,7 +30,7 @@ module.exports =
       "move the x axis 10mm and the y axis 10mm at 200% feedrate": "move x:10 y:10 @ 200%"
   stop_move:
     description: """
-      stop all axes of the printer
+      stop all axes of the printer that are moving continuously.
     """
   set:
     description: """
@@ -43,8 +43,10 @@ module.exports =
       "Start heating the bed to 100 degrees celcius": "set b: 100"
       "Turn off the extruder's heater (unless it's bellow freezing)": "set e: 0"
       # set temp e0:220 e1:0 b:100
-      # set feedrate xy: 100 z: 1
       # set temp 220
+
+      # set feedrate xy: 100 z: 1
+      # set fan on
   estop:
     description: """
       Emergency stop. Stop all dangerous printer activity
