@@ -24,20 +24,22 @@ module.exports =
     """
     optional_args: ["continuous", "x", "y", "z"]
     examples:
-      "move the y axis forward until stopped": "move y: ++"
-      "move the y axis backward until stopped": "move y: --"
       "move the x axis 10mm to the right": "move x: 10"
       "move the x axis 10mm and the y axis 10mm at 200% feedrate": "move x:10 y:10 @ 200%"
-  stop_move:
-    description: """
-      stop all axes of the printer that are moving continuously.
-    """
+      # Proposed Additions:
+      #   "move the y axis forward until stopped": "move y: ++"
+      #   "move the y axis backward until stopped": "move y: --"
+  # Proposed Additions:
+  #   stop_move:
+  #     description: """
+  #       stop all axes of the printer that are moving continuously.
+  #     """
   set:
     description: """
       sets the target temperature(s) of the printer's extruder(s)
       or bed
     """
-    optional_args: ["e", "e0", "e1", "e2", "b"]
+    optional_args: ["e", "b"]# Proposed Additions: ["e", "e0", "e1", "e2", "b"]
     examples:
       "Start heating the primary (0th) extruder to 220 degrees celcius": "set e: 220"
       "Start heating the bed to 100 degrees celcius": "set b: 100"
