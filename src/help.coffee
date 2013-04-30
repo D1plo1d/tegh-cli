@@ -42,11 +42,11 @@ module.exports =
       "Start heating the primary (0th) extruder to 220 degrees celcius": "set e: 220"
       "Start heating the bed to 100 degrees celcius": "set b: 100"
       "Turn off the extruder's heater (unless it's bellow freezing)": "set e: 0"
-      # set temp e0:220 e1:0 b:100
-      # set temp 220
-
-      # set feedrate xy: 100 z: 1
-      # set fan on
+      # Proposed Additions:
+      #   set temp e0:220 e1:0 b:100
+      #   set temp 220
+      #   set feedrate xy: 100 z: 1
+      #   set fan on
   estop:
     description: """
       Emergency stop. Stop all dangerous printer activity
