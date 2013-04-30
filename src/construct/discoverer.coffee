@@ -1,5 +1,5 @@
 mdns = require 'mdns'
-st = require '../node_modules/mdns/lib/service_type'
+st = require 'mdns/lib/service_type'
 EventEmitter = require('events').EventEmitter
 
 module.exports = class ConstructDiscoverer extends EventEmitter

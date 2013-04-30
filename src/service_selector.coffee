@@ -62,9 +62,11 @@ module.exports = class ServiceSelector extends EventEmitter
       @stop()
       @emit("select", @services.list[@selected_index])
 
-  onKeyData: ( key ) ->
+  onKeyData: ( key ) =>
     # ctrl-c ( end of text )
-    process.exit() if ( key == '\u0003' or key == `'\4'` )
+    if ( key == '\u0003' or key == `'\4'` )
+      @cursor.show()
+      process.exit()
 
   stop: () =>
     stdin._emitKeypress = false
