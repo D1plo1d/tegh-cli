@@ -56,10 +56,6 @@ module.exports =
     description: """
       Starts printing this printer's queued print jobs.
     """
-  # pause_print:
-  #   description: """
-  #     Pause the current print job (not necessarily immediately).
-  #   """
   add_job:
     description: """
       Add a print job to the end of the printer's queue.
