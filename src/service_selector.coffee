@@ -55,6 +55,7 @@ module.exports = class ServiceSelector extends EventEmitter
         .reset()
 
   onKeyPress: (ch, key) =>
+    return unless key?
     if ["up", "down"].indexOf(key.name) > -1
       @selected_index += if key.name == "up" then -1 else +1
       @render()
