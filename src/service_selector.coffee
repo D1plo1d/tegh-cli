@@ -60,6 +60,7 @@ module.exports = class ServiceSelector extends EventEmitter
       @selected_index += if key.name == "up" then -1 else +1
       @render()
     if key.name == "enter" and @services.list.length > 0
+      @cursor.show()
       @stop()
       @emit("select", @services.list[@selected_index])
 
