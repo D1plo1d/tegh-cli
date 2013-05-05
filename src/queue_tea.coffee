@@ -122,7 +122,7 @@ class QueueTea
     stdout.write("\r")
     console.log "Print Jobs:\n"
     for job, i in jobs
-      console.log "  #{i} ) #{job.original_file_name}"
+      console.log "  #{i}) #{job.file_name}"
     console.log ""
     @cli.rl.prompt()
     @cli.rl.resume()
