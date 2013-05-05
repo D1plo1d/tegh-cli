@@ -124,7 +124,9 @@ class QueueTea
     for job, i in jobs
       name = job.file_name
       id = job.id.toString()
-      console.log "  #{i}) #{name} #{" ".padRight(".", 72-name.length)} job ##{job.id.pad(5)}"
+      prefix = "  #{i}) #{name} "
+      suffix = "job ##{job.id.pad(5)}  "
+      console.log "#{prefix.padRight(".", @cli.width - suffix.length - prefix.length - 1)} #{suffix}"
     console.log ""
     @cli.rl.prompt()
     @cli.rl.resume()
@@ -166,7 +168,7 @@ class QueueTea
   _appendHelp: ->
     help = """
       Help
-      #{"".padLeft("-", 80)}
+      #{"".padLeft("-", @cli.width)}
       The following commands are available on your printer:\n\n
     """
     # The following commands are available on your printer,
