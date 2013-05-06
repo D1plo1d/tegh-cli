@@ -26,8 +26,6 @@ Good luck and happy printing.
 
 #### Ubuntu Installation (Untested)
 
-These instructions borrow heavily from
-
 1. Install NodeJS: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager
 2. `sudo apt-get install nodejs avahi-daemon libavahi-compat-libdnssd-dev`
 3. `sudo npm install -g coffee-script`
