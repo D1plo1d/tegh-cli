@@ -26,10 +26,13 @@ Good luck and happy printing.
 
 #### Ubuntu Installation (Untested)
 
-1. Install NodeJS: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager
+1. Install NodeJS: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
 2. `sudo apt-get install nodejs avahi-daemon libavahi-compat-libdnssd-dev`
 3. `sudo npm install -g coffee-script`
 4. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
+
+*Note:* If you are using vagrant to test Ubuntu you will need to use:
+`npm install --no-bin-link` instead of `npm install`.
 
 #### Arch Installation (Untested)
 
