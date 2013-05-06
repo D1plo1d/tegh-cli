@@ -31,7 +31,7 @@ Good luck and happy printing.
 3. `sudo npm install -g coffee-script`
 4. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
 
-*Note:* If you are using vagrant to test Ubuntu you will need to use:
+*Note:* If you are using vagrant to test Ubuntu you will need to use
 `npm install --no-bin-link` instead of `npm install`.
 
 #### Arch Installation (Untested)
