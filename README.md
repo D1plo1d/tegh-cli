@@ -44,7 +44,7 @@ Good luck and happy printing.
 
 1. Install nodejs and npm using the MSI installer
 2. Reboot
-3. Download this repository and open it in cmd
+3. Download this repository and open it in cmd as administrator
 4. `npm install`
 
 
