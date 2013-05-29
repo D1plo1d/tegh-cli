@@ -40,6 +40,20 @@ Good luck and happy printing.
 3. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
 
 
+#### Windows Installation (Work in progress)
+
+1. Install nodejs and npm using the MSI installer
+2. Reboot
+3. Download this repository and open it in cmd
+4. `npm install`
+
+
 ### Usage
 
+#### Linux/OSX
+
 `./queuetea`
+
+#### Windows
+
+`node "./node_modules/coffee-script/bin/coffee" ./src/queue_tea.coffee`
