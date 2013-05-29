@@ -40,7 +40,8 @@ module.exports = class ServiceSelector extends EventEmitter
     for service, i in @services.list
       selected = i == @selected_index
       prefix = if selected then ">" else " "
-      info = "#{service.host[..-2]}:#{service.port}"
+      info = service.address
+      #info = "#{service.host[..-2]}:#{service.port}"
 
       @cursor.red().fg.green() if selected
       @cursor.write "  #{prefix}  #{service.name} ( #{info} )\n"

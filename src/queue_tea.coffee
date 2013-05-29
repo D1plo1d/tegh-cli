@@ -97,8 +97,9 @@ class QueueTea
 
   _onServiceSelect: (service) =>
     clear()
-    stdout.write "Connecting to #{service.addresses.first()}:#{service.port}..."
-    @client = new ConstructClient(service.addresses.first(), service.port)
+    port = 8888
+    stdout.write "Connecting to #{service.address}:#{port}..."
+    @client = new ConstructClient(service.address, port)
       .on("connect", @_onConnect)
       .on("sensor_changed", @_onSensorChanged)
       .on("jobs", @_onJobsList)

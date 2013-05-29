@@ -1,13 +1,17 @@
-mdns = require 'mdns'
-st = require 'mdns/lib/service_type'
+mdns = require './mdns'
+# st = require 'mdns/lib/service_type'
 EventEmitter = require('events').EventEmitter
 
 module.exports = class ConstructDiscoverer extends EventEmitter
   constructor: ->
     @list = []
     # Watch all construct servers on the network
-    @mdns = mdns.createBrowser( st.protocolHelper('_tcp')('_construct') )
-    @mdns
+    # @mdns = mdns.createBrowser( st.protocolHelper('_tcp')('_construct') )
+    # @mdns
+    #   .on('serviceUp', @_addServer)
+    #   .on('serviceDown', @_rmServer)
+    #   .start()
+    @mdns = new mdns('_construct._tcp.local')
       .on('serviceUp', @_addServer)
       .on('serviceDown', @_rmServer)
       .start()
