@@ -154,9 +154,9 @@ class QueueTea
 
   _parseLine: (line) =>
     line = line.toString()
-    words = line.split(/\s/)[0]
+    words = line.split(/\s/)
     cmd = words.shift()
-    if cmd == "help" then @_appendHelp()
+    if cmd == "help" then @_appendHelp(words[0])
     else if cmd == "exit" then return process.exit()
     else if @commands[cmd]? then @client.send(line)
     else
@@ -166,14 +166,15 @@ class QueueTea
       """
     @cli.render()
 
-  _appendHelp: ->
+  _appendHelp: (cmd) ->
+    return @_appendSpecificHelp(cmd) if cmd?
     help = """
       Help
       #{"".padLeft("-", @cli.width)}
-      The following commands are available on your printer:\n\n
+      The following commands are available on your printer,
+      to learn more about a specific command type help <CMD>\n\n
     """
-    # The following commands are available on your printer,
-    # to learn more about a specific command type help <CMD>\n\n
+    #   The following commands are available on your printer:\n\n
     # """
 
     for cmd, data of @commands
@@ -183,6 +184,31 @@ class QueueTea
     @_append("")
     @_append(help)
     @_append("")
+
+  _appendSpecificHelp: (cmd) ->
+    cmd_info = @commands[cmd]
+    unless cmd_info?
+      return @_append("Invalid Command: #{cmd}")
+    help = """
+      Help: #{cmd}
+      #{"".padLeft("-", @cli.width)}
+      #{cmd_info.description}\n
+    """
+
+    for type in ["required", "optional"]
+      continue unless cmd_info["#{type}_args"]
+      help += "\n"
+      help += "#{type.capitalize()} Arguments:\n"
+      help += (cmd_info["#{type}_args"]).map((arg) -> "  - #{arg}\n").join()
+
+    if cmd_info.examples?
+      help += "Example Useage:\n"
+      help += "  - #{name}: #{ex}\n" for name, ex in cmd_info.examples
+
+
+    @_append("")
+    @_append(help)
+
 
   _autocomplete: (line) =>
     out = []
