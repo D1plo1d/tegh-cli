@@ -31,7 +31,7 @@ module.exports = class ServiceSelector extends EventEmitter
   render: =>
     # Update the services menu
     width = process.stdout.getWindowSize()[0]
-    `util.print("\u001b[2J\u001b[0;0H")`
+    #`util.print("\u001b[2J\u001b[0;0H")`
     @cursor.hide().write "Select a Printer:\n"
     max = @services.list.length - 1
     @selected_index = max if @selected_index > max
@@ -64,6 +64,10 @@ module.exports = class ServiceSelector extends EventEmitter
       @cursor.show()
       @stop()
       @emit("select", @services.list[@selected_index])
+    if key.name == "escape"
+      @cursor.show()
+      process.exit()
+
 
   onKeyData: ( key ) =>
     # ctrl-c ( end of text )

@@ -17,7 +17,7 @@ module.exports = class ConstructDiscoverer extends EventEmitter
       .start()
 
   _addServer: (service) =>
-    console.log service
+    # console.log service
     @list.push service
     @emit "serviceUp", service
 

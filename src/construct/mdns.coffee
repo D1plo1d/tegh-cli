@@ -1,10 +1,20 @@
+dgram = require('dgram')
 dns = require('native-dns')
-PendingRequests = require('./pending')
+UDPSocket = require('native-dns/lib/utils').UDPSocket
+DnsPacket = require('native-dns/lib/packet')
+consts = require('native-dns/lib/consts')
 util = require('util')
 EventEmitter = require('events').EventEmitter
 
+`var random_integer = function() {
+  return Math.floor(Math.random() * 50000 + 1);
+};`
+
+
 module.exports = class DnsSdDiscoverer extends EventEmitter
-  multicastAddresses: ["224.0.0.251", "FF02::FB"]
+  multicastAddresses:
+    udp4: "224.0.0.251"
+    udp6: "FF02::FB"
   mdnsServer: 
     port: 5353
     type: "udp"
@@ -19,54 +29,54 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     @start = Date.now()
     @_sockets = []
 
-    @_makeMdnsRequest address for address in @multicastAddresses
+    for type, address of @multicastAddresses
+      @_makeMdnsRequest type, address
     setTimeout(@close, 2000);
 
-  _makeMdnsRequest: (address) ->
+  _makeMdnsRequest: (type, address) ->
+    server = 
+      port: @mdnsServer.port
+      type: @mdnsServer.type
+      address: address
     question = dns.Question @dnsSdOpts
-    server = port: @mdnsServer.port, type: @mdnsServer.type
-    server.address = address
+    dg = dgram.createSocket(type)
+    socket = new UDPSocket dg, server
+
     req = dns.Request
       question: question
       server: server
       timeout: 2000
 
-    _onMessage = @_onMessage
-    mdns = @
+    packet = new DnsPacket(socket)
+    packet.timeout = 2000
+    packet.header.id = random_integer()
+    packet.header.rd = 1
+    packet.question.push(req.question)
 
-    # req.done = -> console.log "doneish"
-    req._send = ->
-      self = this
+    dg.on "message", @_onMessage
 
-      this.timer_ = setTimeout( ->
-        self.handleTimeout()
-      , this.timeout)
-
-      socket = PendingRequests.send(self)
-      mdns._sockets.push(socket)
-      console.log "socket loaded"
-      socket.on "mdnsMessage", _onMessage
-
-    req
-      # .on("end", @_onEnd)
-      .send()
+    packet.send()
+    dg.ref()
+    @_sockets.push dg
 
   close: =>
-    socket.close() for socket in @_sockets
+    for socket in @_sockets
+      socket.unref()
+      socket.close()
     # console.log "Closing the MDNS discovery udp connections"
 
-  _onMessage: (data) =>
-    # console.log data._socket.address
-    data.answer.forEach (a) =>
-      return unless a.data == @filter
+  _onMessage: (buffer, rinfo) =>
+    packet = DnsPacket.parse(buffer)
+    services = []
+    services.push a.data for a in packet.answer
+    console.log "response"
+    console.log services if rinfo.address == "192.168.111.23"
+    for service in services
+      continue unless service == @filter
       @emit "serviceUp",
-        address: data._socket.address
-        services: a.data
+        address: rinfo.address
+        services: service
         name: @filter
-
-  # _onEnd: =>
-  #   delta = (Date.now()) - @start
-  #   console.log "Finished processing request: " + delta.toString() + "ms"
 
 
 new DnsSdDiscoverer()
