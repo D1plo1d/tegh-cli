@@ -221,15 +221,23 @@ class QueueTea
     if words[0] == "add_job"
       # Creating a glob to find files that start with the path
       # the user is building.
+      words[1] = "~" if words[1] == "~/"
       relative = (words[1]||"").indexOf("~") == 0
       globPath = (words[1..]||[""]).join(" ") + "*"
-      globPath = path.get globPath if relative
+      globPath = path.get globPath
 
-      out = glob(globPath, sync: true)
+      out = glob(globPath, sync: true).filter (path) ->
+        path.endsWith(/\.gcode/) or fs.lstatSync(path).isDirectory()
 
+      # If there is only 1 result set the current REPL line to it's 
+      # value.
       if out.length == 1
-        @cli.rl.line = "add_job /" if relative
+        stats = fs.lstatSync(out[0])
+        out[0] += '/' if !out[0].endsWith("/") and stats.isDirectory()
         out[0] = "add_job #{out[0]}"
+        @cli.rl.line = out[0]
+        @cli.rl.cursor = out[0].length
+        out[0] = ""
 
     return [out, line]
 
