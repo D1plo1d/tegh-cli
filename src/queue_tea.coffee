@@ -158,7 +158,11 @@ class QueueTea
     cmd = words.shift()
     if cmd == "help" then @_appendHelp(words[0])
     else if cmd == "exit" then return process.exit()
-    else if @commands[cmd]? then @client.send(line)
+    else if @commands[cmd]?
+      try
+        @client.send(line)
+      catch e
+        @_append e
     else
       @_append """
         Error: '#{cmd}' is not a valid command.

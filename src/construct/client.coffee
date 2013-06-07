@@ -30,6 +30,8 @@ module.exports = class ConstructClient extends EventEmitter
   add_job: (msg) ->
     filePath = msg.replace(/^add_job/, "").trim()
 
+    throw "File does not exist: #{filePath}" unless fs.existsSync filePath
+
     form = new FormData()
     form.append('my_field', 'my_value')
     form.append('job', fs.createReadStream(filePath))
