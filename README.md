@@ -36,7 +36,7 @@ Good luck and happy printing.
 #### Arch Installation (Untested)
 
 1. `pacman -S nodejs coffee-script`
-3. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
+2. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
 
 
 #### Windows Installation (Work in progress)
