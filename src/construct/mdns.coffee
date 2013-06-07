@@ -69,8 +69,6 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     packet = DnsPacket.parse(buffer)
     services = []
     services.push a.data for a in packet.answer
-    console.log "response"
-    console.log services if rinfo.address == "192.168.111.23"
     for service in services
       continue unless service == @filter
       @emit "serviceUp",
