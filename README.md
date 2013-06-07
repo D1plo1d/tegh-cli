@@ -19,15 +19,14 @@ Good luck and happy printing.
 
 ### Installation
 
-1. Install avahi-daemon (Linux) or bonjour (OSX) or bonjour-windows (Windows)
-2. Install nodejs and npm
-3. Install Coffeescript (`npm install -g coffee-script`)
-4. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
+1. Install nodejs and npm
+2. Install Coffeescript (`npm install -g coffee-script`)
+3. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
 
 #### Ubuntu Installation (Untested)
 
 1. Install NodeJS: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
-2. `sudo apt-get install nodejs avahi-daemon libavahi-compat-libdnssd-dev`
+2. `sudo apt-get install nodejs`
 3. `sudo npm install -g coffee-script`
 4. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
 
@@ -36,7 +35,7 @@ Good luck and happy printing.
 
 #### Arch Installation (Untested)
 
-1. `pacman -S avahi nss-mdns nodejs coffee-script`
+1. `pacman -S nodejs coffee-script`
 3. `git clone git://github.com/D1plo1d/queuetea.git;cd queuetea;npm install`
 
 
