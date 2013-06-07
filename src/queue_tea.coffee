@@ -201,7 +201,7 @@ class QueueTea
       continue unless cmd_info["#{type}_args"]
       help += "\n"
       help += "#{type.capitalize()} Arguments:\n"
-      help += (cmd_info["#{type}_args"]).map((arg) -> "  - #{arg}\n").join()
+      help += (cmd_info["#{type}_args"]).map((arg) -> "  - #{arg}\n").join("")
 
     if cmd_info.examples?
       help += "Example Useage:\n"
