@@ -178,21 +178,19 @@ class QueueTea
       The following commands are available on your printer,
       to learn more about a specific command type help <CMD>\n\n
     """
-    #   The following commands are available on your printer:\n\n
-    # """
 
     for cmd, data of @commands
       desc = data.description.split("\n")
       help += "- #{cmd.padRight(" ", 12 - cmd.length)} - #{desc.shift()}\n"
       help += "#{d.padLeft(" ", 12+5)}\n" for d in desc
+
     @_append("")
     @_append(help)
     @_append("")
 
   _appendSpecificHelp: (cmd) ->
     cmd_info = @commands[cmd]
-    unless cmd_info?
-      return @_append("Invalid Command: #{cmd}")
+    return @_append("Invalid Command: #{cmd}") unless cmd_info?
     help = """
       Help: #{cmd}
       #{"".padLeft("-", @cli.width)}
@@ -209,40 +207,54 @@ class QueueTea
       help += "Example Useage:\n"
       help += "  - #{name}: #{ex}\n" for name, ex in cmd_info.examples
 
-
     @_append("")
     @_append(help)
-
 
   _autocomplete: (line) =>
     out = []
     words = line.split(" ")
+    # Command Autocompletion
     if words.length == 1
-      for cmd, data of @commands
-        out.push cmd if cmd.indexOf(line) == 0
-      out[0] = out[0] + " " if out.length == 1
-
+      out = @_autocomplete_cmd(line)
+    # Help Autocomplete
+    if words[0] == "help"
+      out = @_autocomplete_cmd words[1..].join(" "), "help "
+      out[0] = out[0].trim()
+    # Directory Autocompletion
     if words[0] == "add_job"
-      # Creating a glob to find files that start with the path
-      # the user is building.
-      words[1] = "~" if words[1] == "~/"
-      relative = (words[1]||"").indexOf("~") == 0
-      globPath = (words[1..]||[""]).join(" ") + "*"
-      globPath = path.get globPath
+      return @_autocomplete_dir out, words, line
+    else
+      return [out, line]
 
-      out = glob(globPath, sync: true).filter (path) ->
-        path.endsWith(/\.gcode/) or fs.lstatSync(path).isDirectory()
+  _autocomplete_cmd: (line, prefix = "") ->
+    out = []
+    for cmd, data of @commands
+      out.push "#{prefix}#{cmd}" if cmd.startsWith(line)
+    out[0] = out[0] + " " if out.length == 1
+    out
 
-      # If there is only 1 result set the current REPL line to it's 
-      # value.
-      if out.length == 1
-        stats = fs.lstatSync(out[0])
-        out[0] += '/' if !out[0].endsWith("/") and stats.isDirectory()
-        out[0] = "add_job #{out[0]}"
-        @cli.rl.line = out[0]
-        @cli.rl.cursor = out[0].length
-        out[0] = ""
+  _autocomplete_dir: (out, words, line) ->
+    # Creating a glob to find files that start with the path
+    # the user is building.
+    words[1] = "~" if words[1] == "~/"
+    relative = (words[1]||"").indexOf("~") == 0
+    globPath = (words[1..]||[""]).join(" ") + "*"
+    globPath = path.get globPath
+
+    out = glob(globPath, sync: true).filter (path) ->
+      path.endsWith(/\.gcode/) or fs.lstatSync(path).isDirectory()
+
+    # If there is only 1 result set the current REPL line to it's 
+    # value.
+    if out.length == 1
+      stats = fs.lstatSync(out[0])
+      out[0] += '/' if !out[0].endsWith("/") and stats.isDirectory()
+      out[0] = "add_job #{out[0]}"
+      @cli.rl.line = out[0]
+      @cli.rl.cursor = out[0].length
+      out[0] = ""
 
     return [out, line]
+
 
 new QueueTea()
