@@ -86,7 +86,7 @@ class CliConsole
     stdin.resume()
 
 
-class QueueTea
+class Tegh
   commands: require './help'
 
   constructor: ->
@@ -257,4 +257,4 @@ class QueueTea
     return [out, line]
 
 
-new QueueTea()
+new Tegh()
