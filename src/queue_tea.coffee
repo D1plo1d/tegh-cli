@@ -242,7 +242,7 @@ class QueueTea
     globPath = path.get globPath
 
     out = glob(globPath, sync: true).filter (path) ->
-      path.endsWith(/\.gcode/) or fs.lstatSync(path).isDirectory()
+      path.endsWith(/\.gcode|.ngc/) or fs.lstatSync(path).isDirectory()
 
     # If there is only 1 result set the current REPL line to it's 
     # value.
