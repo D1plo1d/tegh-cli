@@ -18,6 +18,10 @@ clear = -> `util.print("\u001b[2J\u001b[0;0f")`
 getUserHome = ->
   process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
 
+longestPrefix = (a, b) ->
+  for i in [1..a.length]
+    return a[0..-i] if b.startsWith(a[0..-i])
+
 class CliConsole
   historyPath: "#{getUserHome()}/.construct_history"
 
@@ -93,8 +97,6 @@ class Tegh
     new ServiceSelector().on "select", @_onServiceSelect
     @_sensors = {}
 
-
-
   _onServiceSelect: (service) =>
     clear()
     port = 8888
@@ -162,7 +164,7 @@ class Tegh
       try
         @client.send(line)
       catch e
-        @_append e
+        @_append "Error: #{e}"
     else
       @_append """
         Error: '#{cmd}' is not a valid command.
@@ -238,22 +240,29 @@ class Tegh
     # the user is building.
     words[1] = "~" if words[1] == "~/"
     relative = (words[1]||"").indexOf("~") == 0
-    globPath = (words[1..]||[""]).join(" ") + "*"
-    globPath = path.get globPath
+    absPath = path.get (words[1..]||[""]).join(" ")
 
-    out = glob(globPath, sync: true).filter (path) ->
-      path.endsWith(/\.gcode|.ngc/) or fs.lstatSync(path).isDirectory()
+    out = glob(absPath + "*", sync: true).filter (p) ->
+      p.endsWith(/\.gcode|.ngc/) or fs.lstatSync(p).isDirectory()
+
+    # Attempting to find a common prefix in all the matched paths and 
+    # autocomplete that prefix.
+    shortest = out.reduce longestPrefix, out[0]
+    # console.log shortest
+    # console.log shortest
+    # console.log shortest
+    absPath = shortest if shortest? and shortest.length > absPath.length
 
     # If there is only 1 result set the current REPL line to it's 
     # value.
     if out.length == 1
-      stats = fs.lstatSync(out[0])
-      out[0] += '/' if !out[0].endsWith("/") and stats.isDirectory()
-      out[0] = "add_job #{out[0]}"
-      @cli.rl.line = out[0]
-      @cli.rl.cursor = out[0].length
+      absPath = out[0]
       out[0] = ""
 
+    isDirectory = fs.existsSync(absPath) and fs.lstatSync(absPath).isDirectory()
+    absPath += '/' if !absPath.endsWith("/") and isDirectory
+    @cli.rl.line = line = "add_job #{absPath}"
+    @cli.rl.cursor = line.length
     return [out, line]
 
 
