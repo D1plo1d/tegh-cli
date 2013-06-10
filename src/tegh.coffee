@@ -215,6 +215,7 @@ class Tegh
   _autocomplete: (line) =>
     out = []
     words = line.split(" ")
+    setTimeout ( => @cli.render() ), 0
     # Command Autocompletion
     if words.length == 1
       out = @_autocomplete_cmd(line)
