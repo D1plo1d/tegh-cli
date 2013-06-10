@@ -173,7 +173,7 @@ class Tegh
     @cli.render()
 
   _appendHelp: (cmd) ->
-    return @_appendSpecificHelp(cmd) if cmd?
+    return @_appendSpecificHelp(cmd) if cmd? and cmd.length > 0
     help = """
       Help
       #{"".padLeft("-", @cli.width)}
