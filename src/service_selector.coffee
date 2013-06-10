@@ -32,7 +32,13 @@ module.exports = class ServiceSelector extends EventEmitter
     # Update the services menu
     width = process.stdout.getWindowSize()[0]
     `util.print("\u001b[2J\u001b[0;0H")`
-    @cursor.hide().write "Select a Printer:\n"
+    @cursor
+      .hide()
+      .write("Select a Printer with ")
+      .red()
+      .write("[ENTER]")
+      .white()
+      .write(":\n")
     max = @services.list.length - 1
     @selected_index = max if @selected_index > max
     @selected_index = 0 if @selected_index < 0

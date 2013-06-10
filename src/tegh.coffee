@@ -40,6 +40,7 @@ class CliConsole
 
     clear()
     @render(false)
+    stdout.write "To see a list of commands, type help\n"
     @rl.setPrompt("> ", 2)
     @rl.prompt()
 
