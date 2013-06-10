@@ -77,12 +77,14 @@ class CliConsole
     stdin.pause()
     @updateSize()
 
-    header = @src._header()
+    lHeader = @src._lHeader()
+    rHeader = @src._rHeader()
     c = @cursor
 
     c.savePosition().goto(0, 0)
     c.black().bg.white()
-    c.write(header.padRight(" ", @width - header.length))
+    c.write(lHeader.padRight(" ", @width - lHeader.length - rHeader.length))
+    c.write(rHeader)
     c.reset().bg.reset()
 
     c.goto(0, @height+2).show()
@@ -92,6 +94,7 @@ class CliConsole
 
 class Tegh
   commands: require './help'
+  _jobProgress: 0
 
   constructor: ->
     new ServiceSelector().on "select", @_onServiceSelect
@@ -104,6 +107,7 @@ class Tegh
     @client = new ConstructClient(service.address, port)
       .on("connect", @_onConnect)
       .on("sensor_changed", @_onSensorChanged)
+      .on("job_progress_changed", @_onJobChanged)
       .on("jobs", @_onJobsList)
       .on("job_upload_complete", @_onJobUploadComplete)
       .on("close", @_onClose)
@@ -114,6 +118,10 @@ class Tegh
 
   _onSensorChanged: (data) =>
     @_sensors[data.name] = data.value
+    @cli.render()
+
+  _onJobChanged: (data) =>
+    @_jobProgress = data
     @cli.render()
 
   _onClose: =>
@@ -142,14 +150,17 @@ class Tegh
         status = "Error adding job."
       process.stdout.write("\r" + status + "\n")
       @cli.rl.prompt()
+      @cli.render()
       @cli.rl.resume()
 
-
-  _header: ->
+  _lHeader: ->
     fields = []
     for k, v of @_sensors
       fields.push "#{k.capitalize()}: #{v}\u00B0C"
     fields.join("  ")
+
+  _rHeader: ->
+    "#{@_jobProgress.format(2)}% Complete "
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
