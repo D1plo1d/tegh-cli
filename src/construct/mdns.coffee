@@ -68,12 +68,10 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
   _onMessage: (buffer, rinfo) =>
     packet = DnsPacket.parse(buffer)
     services = []
-    services.push a.data for a in packet.answer
-    for service in services
-      continue unless service == @filter
+    for service in packet.answer
+      continue unless service.data == @filter
       @emit "serviceUp",
         address: rinfo.address
-        services: service
         name: @filter
 
 
