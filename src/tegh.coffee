@@ -143,10 +143,15 @@ class Tegh
     for job, i in jobs
       name = job.file_name
       id = job.id.toString()
-      prefix = "  #{i}) #{name} "
-      suffix = "job ##{job.id.pad(5)}  "
+      prefix = "  #{i}) #{name} ";
+      if job.printing
+        suffix = "PRINTING    "
+      else
+        suffix = "job ##{job.id.pad(5)}  "
       padding = @cli.width - suffix.length - prefix.length - 1
-      console.log "#{prefix.padRight(".", padding)} #{suffix}"
+      line = "#{prefix.padRight(".", padding)} #{suffix}"
+      line = line.green if job.printing
+      console.log line
     console.log ""
     @cli.rl.prompt()
     @cli.rl.resume()
