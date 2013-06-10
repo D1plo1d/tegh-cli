@@ -96,10 +96,12 @@ class CliConsole
 class Tegh
   commands: require './help'
   _jobProgress: 0
+  _sensorMap: {e: 'extruder', e0: 'extruder', b: 'bed'}
 
   constructor: ->
     new ServiceSelector().on "select", @_onServiceSelect
     @_sensors = {}
+    @_targetTemp = {}
 
   _onServiceSelect: (service) =>
     clear()
@@ -108,6 +110,7 @@ class Tegh
     @client = new ConstructClient(service.address, port)
       .on("connect", @_onConnect)
       .on("sensor_changed", @_onSensorChanged)
+      .on("target_temp_changed", @_onTargetTempChanged)
       .on("job_progress_changed", @_onJobChanged)
       .on("jobs", @_onJobsList)
       .on("job_upload_complete", @_onJobUploadComplete)
@@ -116,6 +119,10 @@ class Tegh
 
   _onConnect: =>
     @cli = new CliConsole(@)
+
+  _onTargetTempChanged: (data) =>
+    @_targetTemp[@_sensorMap[k]] = v for k, v of data
+    @cli.render()
 
   _onSensorChanged: (data) =>
     @_sensors[data.name] = data.value
@@ -138,26 +145,27 @@ class Tegh
       id = job.id.toString()
       prefix = "  #{i}) #{name} "
       suffix = "job ##{job.id.pad(5)}  "
-      console.log "#{prefix.padRight(".", @cli.width - suffix.length - prefix.length - 1)} #{suffix}"
+      padding = @cli.width - suffix.length - prefix.length - 1
+      console.log "#{prefix.padRight(".", padding)} #{suffix}"
     console.log ""
     @cli.rl.prompt()
     @cli.rl.resume()
 
   _onJobUploadComplete: (statusCode) =>
-      @cli.rl.pause()
-      if statusCode = 200
-        status = "Job added."
-      else
-        status = "Error adding job."
-      process.stdout.write("\r" + status + "\n")
-      @cli.rl.prompt()
-      @cli.render()
-      @cli.rl.resume()
+    @cli.rl.pause()
+    if statusCode = 200
+      status = "Job added."
+    else
+      status = "Error adding job."
+    process.stdout.write("\r" + status + "\n")
+    @cli.rl.prompt()
+    @cli.render()
+    @cli.rl.resume()
 
   _lHeader: ->
     fields = []
     for k, v of @_sensors
-      fields.push "#{k.capitalize()}: #{v}\u00B0C"
+      fields.push "#{k.capitalize()}: #{v} / #{@_targetTemp[k]||0}\u00B0C"
     fields.join("  ")
 
   _rHeader: ->
