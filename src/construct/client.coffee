@@ -65,7 +65,7 @@ module.exports = class ConstructClient extends EventEmitter
     for k,v of message
       @emit (if k == "error" then "construct_#{k}" else k), v
 
-    if message.ack? or message.error?
+    if Object.has(message, "ack") or Object.has(message, "error")
       @blocking = false
       @emit "unblocked"
 

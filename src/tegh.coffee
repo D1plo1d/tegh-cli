@@ -145,7 +145,7 @@ class Tegh
     process.exit()
 
   _onAck: (data) =>
-    @_onJobList(data.jobs) if data.jobs?
+    @_onJobList(data.jobs) if data?.jobs?
 
   _onError: (data) =>
     @_append "Error: #{data}"
