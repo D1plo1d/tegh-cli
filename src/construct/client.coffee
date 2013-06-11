@@ -8,6 +8,8 @@ fs = require 'fs-extra'
 stdout = process.stdout
 
 module.exports = class ConstructClient extends EventEmitter
+  blocking: false
+
   constructor: (@host, @port) ->
     @user = "admin"
     @password = "admin"
@@ -21,13 +23,14 @@ module.exports = class ConstructClient extends EventEmitter
     @socket.connect url, "construct.text.0.0.1"
 
   send: (msg) =>
+    @blocking = true
     if msg.indexOf("add_job") == 0
-      @add_job(msg)
+      @_add_job(msg)
     else
       @connection.sendUTF msg
 
   # sends the add_job command as a http post multipart form request
-  add_job: (msg) ->
+  _add_job: (msg) ->
     filePath = msg.replace(/^add_job/, "").trim()
 
     throw "#{filePath} does not exist" unless fs.existsSync filePath
@@ -58,9 +61,13 @@ module.exports = class ConstructClient extends EventEmitter
   _onMessage: (m) =>
     message = JSON.parse m.utf8Data
     @emit "message", message
+
     for k,v of message
-      k = "construct_#{k}" if k == "error"
-      @emit k, v
+      @emit (if k == "error" then "construct_#{k}" else k), v
+
+    if message.ack? or message.error?
+      @blocking = false
+      @emit "unblocked"
 
   _onClose: () =>
     @emit "close"

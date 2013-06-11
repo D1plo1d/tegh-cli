@@ -51,9 +51,13 @@ class CliConsole
     stdin.on 'data', @_onData
 
   _onLine: (line) =>
+    return if @src.client.blocking
     @src._parseLine(line)
     @render(false)
-    @rl.prompt()
+    if @src.client.blocking
+      @rl.pause()
+    else
+      @rl.prompt()
 
   _onSIGINT: =>
     if @rl.line == ""
@@ -62,6 +66,7 @@ class CliConsole
       stdout.write("\n")
       @rl.line = ""
       @rl.prompt()
+      stdin.resume()
 
   _onData: (char) =>
     process.exit() if char == `'\4'`
@@ -69,6 +74,7 @@ class CliConsole
   _onExit: =>
     fs.writeFileSync @historyPath, @rl.history.join("\n")
     stdout.write("\n")
+    stdin.resume()
 
   updateSize: ->
     @width = stdout.columns
@@ -112,7 +118,9 @@ class Tegh
       .on("sensor_changed", @_onSensorChanged)
       .on("target_temp_changed", @_onTargetTempChanged)
       .on("job_progress_changed", @_onJobChanged)
-      .on("jobs", @_onJobsList)
+      .on("ack", @_onAck)
+      .on("construct_error", @_onError)
+      .on("unblocked", @_onUnblocked)
       .on("job_upload_complete", @_onJobUploadComplete)
       .on("close", @_onClose)
     # @client = new ConstructClient(service.host[0..-2], service.port)
@@ -136,7 +144,17 @@ class Tegh
     console.log("Server disconnected.")
     process.exit()
 
-  _onJobsList: (jobs) =>
+  _onAck: (data) =>
+    @_onJobList(data.jobs) if data.jobs?
+
+  _onError: (data) =>
+    @_append "Error: #{data}"
+
+  _onUnblocked: =>
+    @cli.rl.resume()
+    @cli.rl.prompt()
+
+  _onJobList: (jobs) ->
     @cli.rl.pause()
     stdout.write("\r")
     console.log "Print Jobs:\n"
