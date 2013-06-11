@@ -153,6 +153,7 @@ class Tegh
       line = line.green if job.printing
       console.log line
     console.log ""
+    @cli.render()
     @cli.rl.prompt()
     @cli.rl.resume()
 
