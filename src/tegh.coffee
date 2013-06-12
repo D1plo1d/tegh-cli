@@ -121,7 +121,6 @@ class Tegh
       .on("ack", @_onAck)
       .on("construct_error", @_onError)
       .on("unblocked", @_onUnblocked)
-      .on("job_upload_complete", @_onJobUploadComplete)
       .on("close", @_onClose)
     # @client = new ConstructClient(service.host[0..-2], service.port)
 
@@ -173,17 +172,6 @@ class Tegh
     console.log ""
     @cli.render()
     @cli.rl.prompt()
-    @cli.rl.resume()
-
-  _onJobUploadComplete: (statusCode) =>
-    @cli.rl.pause()
-    if statusCode = 200
-      status = "Job added."
-    else
-      status = "Error adding job."
-    process.stdout.write("\r" + status + "\n")
-    @cli.rl.prompt()
-    @cli.render()
     @cli.rl.resume()
 
   _lHeader: ->

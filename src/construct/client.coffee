@@ -24,10 +24,14 @@ module.exports = class ConstructClient extends EventEmitter
 
   send: (msg) =>
     @blocking = true
-    if msg.indexOf("add_job") == 0
-      @_add_job(msg)
-    else
-      @connection.sendUTF msg
+    try
+      if msg.indexOf("add_job") == 0
+        @_add_job(msg)
+      else
+        @connection.sendUTF msg
+    catch e
+      @emit "construct_error", e
+      @_unblock()
 
   # sends the add_job command as a http post multipart form request
   _add_job: (msg) ->
@@ -47,7 +51,11 @@ module.exports = class ConstructClient extends EventEmitter
       path: '/jobs'
       auth: "#{@host}:#{@port}"
     form.submit opts, (err, res) =>
-      @emit "job_upload_complete", res.statusCode = 200
+      if err?
+        @emit "construct_error", err
+      else
+        @emit "ack", "Job added."
+      @_unblock()
 
   _onConnect: (@connection) =>
     @emit "connect", @connection
@@ -65,9 +73,11 @@ module.exports = class ConstructClient extends EventEmitter
     for k,v of message
       @emit (if k == "error" then "construct_#{k}" else k), v
 
-    if Object.has(message, "ack") or Object.has(message, "error")
-      @blocking = false
-      @emit "unblocked"
+    @_unblock() if Object.has(message, "ack") or Object.has(message, "error")
+
+  _unblock: ->
+    @blocking = false
+    @emit "unblocked"
 
   _onClose: () =>
     @emit "close"
