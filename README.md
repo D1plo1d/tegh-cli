@@ -6,6 +6,16 @@ A simple command line interface for connecting to 3D printers via the Construct 
 Note: Tegh requires a Construct Server to connect to and print with. In other words, you're going to need [Pronserve](https://github.com/kliment/Printrun/tree/experimental) installed on your printer.
 
 
+## Installation: Normal People Edition
+
+If you are normal peoples or a lazy developer like me then these are the 
+install docs for you! Hopefully your OS is listed below!
+
+### OSX / Homebrew
+
+`brew install https://raw.github.com/D1plo1d/homebrew/18bb5a9abe996f97175fed87a164faf038b21ce4/Library/Formula/tegh.rb --HEAD`
+
+
 ## Developers
 
 This is a guide to installing and using Tegh for developers. If you are not a developer you may find this difficult.
