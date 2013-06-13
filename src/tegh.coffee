@@ -228,21 +228,24 @@ class Tegh
     help = """
       Help: #{cmd}
       #{"".padLeft("-", @cli.width)}
-      #{cmd_info.description}\n
+      #{cmd_info.description.replace("\n", " ")}\n
     """
 
-    for type in ["required", "optional"]
-      continue unless cmd_info["#{type}_args"]
-      help += "\n"
-      help += "#{type.capitalize()} Arguments:\n"
-      help += (cmd_info["#{type}_args"]).map((arg) -> "  - #{arg}\n").join("")
+    for type in ['required', 'optional']
+      section = "#{type}_args"
+      title = "#{type.capitalize()} Arguments"
+      continue unless cmd_info[section]?
+      help += "\n#{title}:\n"
+      help += (cmd_info[section]).map((arg) -> "  - #{arg}\n").join("")
 
     if cmd_info.examples?
-      help += "Example Useage:\n"
-      help += "  - #{name}: #{ex}\n" for name, ex in cmd_info.examples
+      help += "\nExample Usage:\n"
+      for desc, ex of cmd_info.examples
+        help += "  - #{desc}:#{"".padRight(" ", 50-desc.length)}#{ex}\n"
 
     @_append("")
     @_append(help)
+
 
   _autocomplete: (line) =>
     out = []

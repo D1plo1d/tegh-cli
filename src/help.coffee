@@ -9,8 +9,8 @@ module.exports =
     """
   home:
     description: """
-      home the printer's axes. Specifing individual axes will 
-      only home those axes.
+      home the printer's axes. Specifing individual axes will only home those 
+      axes.
     """
     optional_args: ["x", "y", "z"]
     examples:
@@ -19,9 +19,12 @@ module.exports =
       "home the x and y axes": "home x y"
   move:
     description: """
-      move the printer either a fixed distance (default) or 
-      until stopped (via ++ or -- values, if available).
+      move the printer a fixed distance on one or more axis
     """
+    # description: """
+    #   move the printer either a fixed distance (default) or 
+    #   until stopped (via ++ or -- values, if available).
+    # """
     optional_args: ["continuous", "x", "y", "z"]
     examples:
       "move the x axis 10mm to the right": "move x: 10"
@@ -36,14 +39,14 @@ module.exports =
   #     """
   set:
     description: """
-      sets the target temperature(s) of the printer's extruder(s)
+      set the target temperature(s) of the printer's extruder(s)
       or bed
     """
     optional_args: ["e", "b"]# Proposed Additions: ["e", "e0", "e1", "e2", "b"]
     examples:
-      "Start heating the primary (0th) extruder to 220 degrees celcius": "set e: 220"
-      "Start heating the bed to 100 degrees celcius": "set b: 100"
-      "Turn off the extruder's heater (unless it's bellow freezing)": "set e: 0"
+      "Start heating the extruder to 220\u00B0C": "set temp e0: 220"
+      "Set the extruder's target temp. to 0\u00B0C (off)": "set temp e0: 0"
+      "Start heating the bed to 100\u00B0C": "set temp b: 100"
       # Proposed Additions:
       #   set temp e0:220 e1:0 b:100
       #   set temp 220
@@ -51,30 +54,40 @@ module.exports =
       #   set fan on
   estop:
     description: """
-      Emergency stop. Stop all dangerous printer activity
-      immediately.
+      Emergency stop. Stop all dangerous printer activity immediately.
     """
   print:
     description: """
-      Starts printing this printer's queued print jobs.
+      Start printing this printer's queued print jobs (see get_jobs and 
+      add_job).
     """
   add_job:
     description: """
       Add a print job to the end of the printer's queue.
     """
     required_args: ["file"]
-    optional_args: ["qty"]
+    # optional_args: ["qty"]
+    examples:
+      "add example.gcode to the print queue": "add_job ./example.gcode"
   rm_job:
     description: """
       Remove a print job from the printer's queue by it's ID.
     """
     required_args: ["job_id"]
+    examples:
+      "delete job #5": "rm_job 5"
   change_job:
     description: """
-      Change a print job's quantity or position in the queue.
+      Change a print job's position in the printer's queue.
     """
+    # description: """
+    #   Change a print job's quantity or position in the queue.
+    # """
     required_args: ["job_id"]
-    optional_args: ["qty", "position"]
+    optional_args: ["position"] # ["qty", "position"]
+    examples:
+      "move job #3 to the top of the queue": "change_job 3 position: 0"
+      "make job #12 the second next job in the queue": "change_job 12 position: 1"
   get_jobs:
     description: """
       Gets a list of the jobs in the printer's queue.
