@@ -51,7 +51,7 @@ Good luck and happy printing.
 
 #### Linux/OSX
 
-`./Tegh`
+`./bin/tegh`
 
 #### Windows
 
