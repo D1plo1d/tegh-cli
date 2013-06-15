@@ -13,7 +13,11 @@ install docs for you! Hopefully your OS is listed below!
 
 ### OSX / Homebrew
 
-`brew install https://raw.github.com/D1plo1d/homebrew/18bb5a9abe996f97175fed87a164faf038b21ce4/Library/Formula/tegh.rb --HEAD`
+`brew install http://git.io/Tgf1Kg --HEAD`
+
+### Arch
+
+`yaourt -S tegh`
 
 
 ## Developers
