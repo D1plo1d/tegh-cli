@@ -14,6 +14,8 @@ module.exports = class ConstructClient extends EventEmitter
     @user = "admin"
     @password = "admin"
 
+    @.on "initialized", @_onInitialized
+
     @socket = new WebSocketClient(webSocketVersion: 8)
     @socket.on "connect", @_onConnect
     @socket.on 'connectFailed', @_onConnectionFailed
@@ -42,13 +44,13 @@ module.exports = class ConstructClient extends EventEmitter
     throw "#{filePath} is not a file" if fs.lstatSync(filePath).isDirectory()
 
     form = new FormData()
-    form.append('my_field', 'my_value')
+    # form.append('session_uuid', @session_uuid)
     form.append('job', fs.createReadStream(filePath))
 
     opts = 
       host: @host
       port: @port
-      path: '/jobs'
+      path: "/jobs?session_uuid=#{@session_uuid}"
       auth: "#{@host}:#{@port}"
     form.submit opts, (err, res) =>
       if err?
@@ -65,6 +67,9 @@ module.exports = class ConstructClient extends EventEmitter
   _onConnectionFailed: (error) =>
     stdout.write 'Connect Error: ' + error.toString() + "\n"
     process.exit()
+
+  _onInitialized: (data) =>
+    @session_uuid = data.session_uuid
 
   _onMessage: (m) =>
     message = JSON.parse m.utf8Data

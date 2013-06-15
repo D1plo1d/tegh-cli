@@ -115,6 +115,7 @@ class Tegh
     stdout.write "Connecting to #{service.address}:#{port}..."
     @client = new ConstructClient(service.address, port)
       .on("connect", @_onConnect)
+      .on("job_upload_progress_changed", @_renderProgressBar)
       .on("sensor_changed", @_onSensorChanged)
       .on("target_temp_changed", @_onTargetTempChanged)
       .on("job_progress_changed", @_onJobChanged)
@@ -150,6 +151,9 @@ class Tegh
     @_append "Error: #{data}"
 
   _onUnblocked: =>
+    if @_uploading = true
+      @_uploading = null
+      console.log ""
     @cli.rl.resume()
     @cli.rl.prompt()
 
@@ -186,10 +190,22 @@ class Tegh
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
 
+  _renderProgressBar: (data) =>
+    p = (if data? then data.uploaded / data.total * 100 else 0).round()
+    bar = "#{''.pad "#", (p*2/10).round()}#{''.pad '.', (20-p*2/10).round()}"
+    percent = "#{if p > 10 then "" else " "}#{p.round(1)}"
+    stdout.write "\ruploading [#{bar}] #{percent}%"
+
+
   _parseLine: (line) =>
     line = line.toString()
     words = line.split(/\s/)
     cmd = words.shift()
+    if cmd == "add_job"
+      opts = total: 100, width: 40
+      @_renderProgressBar()
+      @_uploading = true
+
     if cmd == "help" then @_appendHelp(words[0])
     else if cmd == "exit" then return process.exit()
     else if @commands[cmd]?
