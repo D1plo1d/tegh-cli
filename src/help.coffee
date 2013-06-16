@@ -25,7 +25,8 @@ module.exports =
     #   move the printer either a fixed distance (default) or 
     #   until stopped (via ++ or -- values, if available).
     # """
-    optional_args: ["continuous", "x", "y", "z"]
+    optional_args: ["x", "y", "z", "e"]
+    # optional_args: ["continuous", "x", "y", "z", "e"]
     examples:
       "move the x axis 10mm to the right": "move x: 10"
       "move the x axis 10mm and the y axis 10mm at 200% feedrate": "move x:10 y:10 @ 200%"
