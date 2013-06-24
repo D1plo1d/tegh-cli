@@ -68,7 +68,7 @@ class CliConsole
       @rl.prompt()
       stdin.resume()
 
-  _onData: (char) =>
+  _onData: (key) =>
     process.exit() if key == '\u0003' or key == `'\4'`
 
   _onExit: =>
