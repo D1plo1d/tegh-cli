@@ -70,3 +70,19 @@ Good luck and happy printing.
 #### Windows
 
 `node "./node_modules/coffee-script/bin/coffee" ./src/queue_tea.coffee`
+
+
+### Packaging
+
+#### Windows
+
+1. Download [node.exe][1] and save it as bin/node.exe
+[1]: http://nodejs.org/dist/latest/node.exe
+1. Spin up a Windows VM
+3. Share tegh's folder with the VM
+4. Install [InnoSetup](http://www.jrsoftware.org/isinfo.php)
+5. Open bin/windows.iss with InnoSetup and compile it
+
+This generates a install script in bin/setup.exe
+
+
