@@ -24,8 +24,8 @@ Download the [Tegh Windows Installer][1]
 
 ### Ubuntu (Untested / Not ready / Here be dragons)
 
-1. [Install NodeJS][1]
-[1]: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
+1. [Install NodeJS][2]
+[2]: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
 2. `sudo apt-get install nodejs`
 3. `sudo npm install -g coffee-script`
 4. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
@@ -73,8 +73,8 @@ That's it. No need to configure anything at all. Tegh will automatically detect 
 
 #### Windows
 
-1. Download [node.exe][1] and save it as bin/node.exe
-[1]: http://nodejs.org/dist/latest/node.exe
+1. Download [node.exe][3] and save it as bin/node.exe
+[3]: http://nodejs.org/dist/latest/node.exe
 1. Spin up a Windows VM
 3. Share tegh's folder with the VM
 4. Install [InnoSetup](http://www.jrsoftware.org/isinfo.php)
