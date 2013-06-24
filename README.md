@@ -6,10 +6,13 @@ A simple command line interface for connecting to 3D printers via the Construct 
 Note: Tegh requires a Construct Server to connect to and print with. In other words, you're going to need [Pronserve](https://github.com/kliment/Printrun/tree/experimental) installed on your printer.
 
 
-## Installation: Normal People Edition
+## Installation
 
-If you are normal peoples or a lazy developer like me then these are the 
-install docs for you! Hopefully your OS is listed below!
+### Windows
+
+Download the [Tegh Windows Installer][1]
+
+[1]:https://s3.amazonaws.com/tegh_binaries/tegh_0.1.0_win32_installer.exe
 
 ### OSX / Homebrew
 
@@ -19,49 +22,43 @@ install docs for you! Hopefully your OS is listed below!
 
 `yaourt -S tegh`
 
+### Ubuntu (Untested / Not ready / Here be dragons)
 
-## Developers
-
-This is a guide to installing and using Tegh for developers. If you are not a developer you may find this difficult.
-
-
-Suffice to say, here be dragons.
-
-
-Good luck and happy printing.
+1. [Install NodeJS][1]
+[1]: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
+2. `sudo apt-get install nodejs`
+3. `sudo npm install -g coffee-script`
+4. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
 
 
-### Installation
+## Useage
+
+### Windows
+
+Open program files / open all programs / open the Tegh folder / run Tegh
+
+### Linux / OSX
+
+To launch tegh from the command line type:
+
+`tegh`
+
+That's it. No need to configure anything at all. Tegh will automatically detect all the compatible printers on the network and let you choose one to connect to.
+
+
+## Development
+
+### Installing from Source
 
 1. Install nodejs and npm
 2. Install Coffeescript (`npm install -g coffee-script`)
 3. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
 
-#### Ubuntu Installation (Untested)
-
-1. Install NodeJS: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
-2. `sudo apt-get install nodejs`
-3. `sudo npm install -g coffee-script`
-4. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
-
 *Note:* If you are using vagrant to test Ubuntu you will need to use
 `npm install --no-bin-link` instead of `npm install`.
 
-#### Arch Installation (Untested)
 
-1. `pacman -S nodejs coffee-script`
-2. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
-
-
-#### Windows Installation (Work in progress)
-
-1. Install nodejs and npm using the MSI installer
-2. Reboot
-3. Download this repository and open it in cmd as administrator
-4. `npm install`
-
-
-### Usage
+### Running Tegh
 
 #### Linux/OSX
 
@@ -69,7 +66,7 @@ Good luck and happy printing.
 
 #### Windows
 
-`node "./node_modules/coffee-script/bin/coffee" ./src/queue_tea.coffee`
+`node "./node_modules/coffee-script/bin/coffee" ./src/tegh.coffee`
 
 
 ### Packaging
