@@ -83,7 +83,7 @@ module.exports = class ServiceSelector extends EventEmitter
   stop: () =>
     stdin._emitKeypress = false
     stdin.removeListener 'keypress', @onKeyPress
-    stdin.removeAllListeners 'data'
+    stdin.removeListener 'data', @onKeyData
     stdin.setRawMode(false)
     stdin.resume()
     for k in ["Up", "Down"]
