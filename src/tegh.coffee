@@ -16,7 +16,8 @@ stdin = process.stdin
 clear = -> `util.print("\u001b[2J\u001b[0;0f")`
 
 getUserHome = ->
-  process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
+  drive = process.env.HOMEDRIVE || ""
+  drive + (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE)
 
 longestPrefix = (a, b) ->
   for i in [1..a.length]

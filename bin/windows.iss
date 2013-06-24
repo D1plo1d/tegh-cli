@@ -5,7 +5,7 @@
 
 [Setup]
 AppName=Tegh     
-LicenseFile=LICENSE                 
+LicenseFile="..\LICENSE"              
 AppVersion=0.0.1
 DefaultDirName={pf}\Tegh
 DefaultGroupName=Tegh
@@ -14,7 +14,7 @@ SolidCompression=yes
 OutputDir= ./
 
 [Files]
-Source: ..\*; DestDir: {app}; Flags: recursesubdirs
+Source: ..\*; DestDir: {app}; Flags: recursesubdirs 
 
 [Icons]
 Name: "{group}\Tegh"; Filename: "{app}\bin\tegh.bat"; WorkingDir: "{app}"
