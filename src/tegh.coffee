@@ -69,7 +69,7 @@ class CliConsole
       stdin.resume()
 
   _onData: (char) =>
-    process.exit() if char == `'\4'`
+    process.exit() if key == '\u0003' or key == `'\4'`
 
   _onExit: =>
     fs.writeFileSync @historyPath, @rl.history.join("\n")

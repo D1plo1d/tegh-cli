@@ -61,10 +61,11 @@ module.exports = class ServiceSelector extends EventEmitter
 
   onKeyPress: (ch, key) =>
     return unless key?
+    isEnter = (key.name == "enter" or key.name == "return")
     if ["up", "down"].indexOf(key.name) > -1
       @selected_index += if key.name == "up" then -1 else +1
       @render()
-    if key.name == "enter" and @services.list.length > 0
+    if isEnter and @services.list.length > 0
       @cursor.show()
       @stop()
       @emit("select", @services.list[@selected_index])
