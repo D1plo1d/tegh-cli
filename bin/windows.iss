@@ -6,7 +6,7 @@
 [Setup]
 AppName=Tegh     
 LicenseFile="..\LICENSE"              
-AppVersion=0.0.1
+AppVersion=0.1.0
 DefaultDirName={pf}\Tegh
 DefaultGroupName=Tegh
 Compression=lzma2
