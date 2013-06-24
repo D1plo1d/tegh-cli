@@ -157,27 +157,27 @@ class Tegh
       console.log ""
     @cli.rl.resume()
     @cli.rl.prompt()
+    @cli.render()
 
   _onJobList: (jobs) ->
     @cli.rl.pause()
     stdout.write("\r")
     console.log "Print Jobs:\n"
-    for job, i in jobs
-      name = job.file_name
-      id = job.id.toString()
-      prefix = "  #{i}) #{name} ";
-      if job.printing
-        suffix = "PRINTING    "
-      else
-        suffix = "job ##{job.id.pad(5)}  "
-      padding = @cli.width - suffix.length - prefix.length - 1
-      line = "#{prefix.padRight(".", padding)} #{suffix}"
-      line = line.green if job.printing
-      console.log line
-    console.log ""
-    @cli.render()
-    @cli.rl.prompt()
-    @cli.rl.resume()
+    @_printJob(job, i) for job, i in jobs
+    @_append "  There are no jobs in the print queue." if jobs.length == 0
+
+  _printJob: (job, i) =>
+    name = job.file_name
+    id = job.id.toString()
+    prefix = "  #{i}) #{name} ";
+    if job.printing
+      suffix = "PRINTING    "
+    else
+      suffix = "job ##{job.id.pad(5)}  "
+    padding = @cli.width - suffix.length - prefix.length - 1
+    line = "#{prefix.padRight(".", padding)} #{suffix}"
+    line = line.green if job.printing
+    console.log line
 
   _lHeader: ->
     fields = []
