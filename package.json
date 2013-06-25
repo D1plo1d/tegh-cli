@@ -13,7 +13,7 @@
     , "request": "*"
     , "form-data": "*"
     , "websocket": "*"
-    , "keypress": "*"
+    , "keypress": ">=0.2"
     , "ansi": "*"
     , "colors": "*"
     , "touch": "*"
