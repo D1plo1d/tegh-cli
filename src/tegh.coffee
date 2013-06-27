@@ -109,6 +109,7 @@ class Tegh
     new ServiceSelector().on "select", @_onServiceSelect
     @_sensors = {}
     @_targetTemp = {}
+    @_targetTempEta = {}
 
   _onServiceSelect: (service) =>
     clear()
@@ -119,6 +120,7 @@ class Tegh
       .on("job_upload_progress_changed", @_renderProgressBar)
       .on("sensor_changed", @_onSensorChanged)
       .on("target_temp_changed", @_onTargetTempChanged)
+      .on("target_temp_progress_changed", @_onTargetTempProgressChanged)
       .on("job_progress_changed", @_onJobChanged)
       .on("ack", @_onAck)
       .on("construct_error", @_onError)
@@ -131,6 +133,10 @@ class Tegh
 
   _onTargetTempChanged: (data) =>
     @_targetTemp[@_sensorMap[k]] = v for k, v of data
+    @cli.render()
+
+  _onTargetTempProgressChanged: (data) =>
+    @_targetTempEta[@_sensorMap[k]] = v for k, v of data
     @cli.render()
 
   _onSensorChanged: (data) =>
@@ -182,7 +188,10 @@ class Tegh
   _lHeader: ->
     fields = []
     for k, v of @_sensors
-      fields.push "#{k.capitalize()}: #{v} / #{@_targetTemp[k]||0}\u00B0C"
+      s = "#{k.capitalize()}: #{v} / #{@_targetTemp[k]||0}\u00B0C"
+      if @_targetTempEta[k]? and @_targetTempEta[k].eta > 0
+        s+= " (#{@_targetTempEta[k].eta.round(1)} seconds)"
+      fields.push s
     fields.join("  ")
 
   _rHeader: ->
