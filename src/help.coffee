@@ -40,19 +40,26 @@ module.exports =
   #     """
   set:
     description: """
-      set the target temperature(s) of the printer's extruder(s)
-      or bed
+      set one or more settings on the printer. The printer's settings are
+      grouped under temp, motors and fan namespaces:
+
+      - temp: set the target temperature(s) of the printer's extruder(s) or bed
+      - motors: enable/disable the printer's motors
+      - fan: enable/disable the printer's fan
     """
-    optional_args: ["e", "b"]# Proposed Additions: ["e", "e0", "e1", "e2", "b"]
+    # optional_args: ["e", "b"]# Proposed Additions: ["e", "e0", "e1", "e2", "b"]
     examples:
       "Start heating the extruder to 220\u00B0C": "set temp e0: 220"
       "Set the extruder's target temp. to 0\u00B0C (off)": "set temp e0: 0"
       "Start heating the bed to 100\u00B0C": "set temp b: 100"
+      "Enable the printer's motors": "set motors on"
+      "Disable the printer's motors": "set motors off"
+      "Enable the printer's fan": "set fan on"
+      "Disable the printer's fan": "set fan off"
       # Proposed Additions:
       #   set temp e0:220 e1:0 b:100
       #   set temp 220
       #   set feedrate xy: 100 z: 1
-      #   set fan on
   estop:
     description: """
       Emergency stop. Stop all dangerous printer activity immediately.
