@@ -22,7 +22,7 @@ module.exports = class ConstructClient extends EventEmitter
 
     #new WebSocketClient "ws://#{@host}:8000/#{@port}", "construct"
     url = "ws://#{@host}:#{@port}/socket?user=#{@user}&password=#{@password}"
-    @socket.connect url, "construct.text.0.0.1"
+    @socket.connect url, "construct.text.0.2"
 
   send: (msg) =>
     @blocking = true

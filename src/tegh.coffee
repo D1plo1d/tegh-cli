@@ -155,7 +155,7 @@ class Tegh
     @_onJobList(data.jobs) if data?.jobs?
 
   _onError: (data) =>
-    @_append "Error: #{data}"
+    @_append "Error: #{data.message}"
 
   _onUnblocked: =>
     if @_uploading = true
