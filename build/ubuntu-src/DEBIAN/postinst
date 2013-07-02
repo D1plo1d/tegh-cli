@@ -1,0 +1,3 @@
+cd /opt/tegh/
+npm install
+ln -sfn /opt/tegh/bin/tegh /usr/bin/tegh

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Tegh
+Comment=Tea Earl Grey Hot
+Exec=tegh
+Terminal=true
+Type=Application
+Categories=Other;Engineering
+StartupNotify=true
