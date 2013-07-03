@@ -1,6 +1,7 @@
-#!/usr/bin/env coffee
-path = require('path')
-fs   = require('fs')
-src  = path.join(path.dirname(fs.realpathSync(__filename)), '../src')
+#!/usr/bin/env node
+path = require('path');
+fs   = require('fs');
+src  = path.join(path.dirname(fs.realpathSync(__filename)), '../src');
 
-require path.join(src, "tegh")
+require('coffee-script');
+require(path.join(src, "tegh"));

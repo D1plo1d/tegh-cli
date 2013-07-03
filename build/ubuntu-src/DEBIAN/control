@@ -2,9 +2,9 @@ Package: tegh
 Version: <%=VERSION%>
 Section: base
 Priority: optional
-Architecture: i386
+Architecture: all
 Installed-Size: <%=SIZE%>
-Depends: coffeescript
+Depends: nodejs (>=0.10.5)
 Maintainer: Rob Gilson <d1plo1d@d1plo1d.com>
 Description: A client for controlling Construct Protocol 3d printers over local
  networks.

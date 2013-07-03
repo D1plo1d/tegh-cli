@@ -24,6 +24,8 @@ rsync -a ../bin/ ${SYSROOT}/opt/tegh/bin/ --delete
 cp ../README.md ${SYSROOT}/opt/tegh/README.md
 cp ../package.json ${SYSROOT}/opt/tegh/package.json
 
+sed -i '' "s/#!\/usr\/bin\/env node/#!\/usr\/bin\/env nodejs/" ${SYSROOT}/opt/tegh/bin/tegh
+
 find ${SRC}/ -type d -exec chmod 0755 {} \;
 find ${SRC}/ -type f -exec chmod go-w {} \;
 # chown -R root:users ${SRC}/

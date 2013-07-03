@@ -24,9 +24,8 @@ Download the [Tegh Windows Installer][1]
 
 ### Ubuntu (Untested / Not ready / Here be dragons)
 
-1. [Install NodeJS][2]
+1. [Install NodeJS from ppa:chris-lea/node.js][2]
 [2]: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
-2. `sudo apt-get install nodejs`
 3. `sudo npm install -g coffee-script`
 4. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
 
