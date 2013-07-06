@@ -8,6 +8,7 @@ lib-cov
 *.pid
 *.gz
 *.deb
+*.rpm
 .vagrant
 
 pids
@@ -19,4 +20,5 @@ node_modules
 
 bin/node.exe
 bin/setup.exe
+build/fedora-src/BUILD/
 

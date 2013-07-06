@@ -26,9 +26,8 @@ Download the [Tegh Windows Installer][1]
 
 1. [Install NodeJS from ppa:chris-lea/node.js][2]
 [2]: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
-2. [Download the latest tegh ubuntu .deb package][3]
+2. Install [tegh-x.y.z.deb][3]
 [3]: https://s3.amazonaws.com/tegh_binaries/tegh-0.2.0-rc4.deb
-3. dpkg -i \[DOWNLOADED FILE NAME NAME HERE\]
 
 ## Useage
 
