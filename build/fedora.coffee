@@ -8,11 +8,6 @@ glob = require('glob')
 fs = require('fs')
 require("sugar")
 
-fedoraRoot = path.resolve __dirname, "fedora-src"
-specFile = path.resolve fedoraRoot, 'SPECS', 'tegh.spec'
-
-console.log(fedoraRoot)
-
 puts = (error, stdout, stderr, cb) ->
   sys.puts(stdout)
   sys.puts(stderr)
@@ -29,34 +24,31 @@ spw = (cmd, args, cb) ->
 
   proc.on "exit", cb if cb?
 
-execSync = (cmd) -> console.log require('exec-sync')(cmd)
+execSync = (cmd) -> console.log _execSync(cmd)
 
-args = [
-  "-ba",
-  "--define", "_topdir #{fedoraRoot}",
-  "--define", "_datadir /usr/share",
-  "--define", "_bindir /usr/bin",
-  "--target",
-  "noarch-redhat-linux",
-  specFile
-]
 
+fedoraRoot = path.resolve __dirname, "fedora-src"
 
 class FedoraBuild
+  args: [
+    "-ba",
+    "--define", "_topdir #{fedoraRoot}",
+    "--define", "_datadir /usr/share",
+    "--define", "_bindir /usr/bin",
+    "--target",
+    "noarch-redhat-linux",
+    path.resolve fedoraRoot, 'SPECS', 'tegh.spec'
+  ]
+
   run: ->
-    previousRpm = @_findRpm()
+    previousRpm = @_rpmPath()
     fs.unlinkSync previousRpm if previousRpm?
-    spw "rpmbuild", args, @postBuild
-# mv ./fedora-src/SOURCES/tegh-master.tar.gz ./fedora-src/SOURCES/master.tar.gz
-# "
-#   rpmbuild #{defines} -ba #{specFile}
-# """, postInstall
+    spw "rpmbuild", @args, @postBuild
 
-  _findRpm: -> glob.sync("fedora-src/RPMS/noarch/tegh-*.rpm")[0]
-
+  _rpmPath: -> glob.sync("fedora-src/RPMS/noarch/tegh-*.rpm")[0]
 
   postBuild: =>
-    @package = @_findRpm()
+    @package = @_rpmPath()
     console.log @package
     execSync "scp #{@package} fedora-ec2:~/stuff"
     console.log @package
