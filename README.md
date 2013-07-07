@@ -12,7 +12,7 @@ Note: Tegh requires a Construct Server to connect to and print with. In other wo
 
 Download the [Tegh Windows Installer][1]
 
-[1]:https://s3.amazonaws.com/tegh_binaries/0.2.0/tegh-0.2.0-installer.exe
+[1]:https://s3.amazonaws.com/tegh_binaries/0.2.0/tegh-0.2.0-setup.exe
 
 ### OSX / Homebrew
 
