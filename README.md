@@ -49,10 +49,9 @@ That's it. No need to configure anything at all. Tegh will automatically detect 
 ### Installing from Source
 
 1. Install nodejs and npm
-2. Install Coffeescript (`npm install -g coffee-script`)
-3. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
+2. `git clone git://github.com/D1plo1d/Tegh.git;cd Tegh;npm install`
 
-*Note:* If you are using vagrant to test Ubuntu you will need to use
+*Note:* If you are installing on a vagrant vm you will need to use
 `npm install --no-bin-link` instead of `npm install`.
 
 
