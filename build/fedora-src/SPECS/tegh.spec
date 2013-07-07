@@ -1,5 +1,5 @@
 Name:      tegh
-Version:   0.2.0.rc4
+Version:   0.2.0
 Release:   1%{?dist}
 Summary:   Tea Earl Grey Hot. A 3D Printer Client.
 License:   MIT
@@ -26,10 +26,12 @@ mkdir -p %{buildroot}%{_datadir}/%{name}/
 
 cd %{_builddir}/../../../
 rm -f "%{_topdir}/BUILD/master.tar.gz"
-tar --exclude="./build" --exclude="./.git" -cpzf "/tmp/tegh-fedora-build.tar.gz" "./"
+tar --exclude="./build" --exclude="./.git" --exclude="./bin/packages" -cpzf "/tmp/tegh-fedora-build.tar.gz" "./"
 mv "/tmp/tegh-fedora-build.tar.gz" "%{_topdir}/SOURCES/master.tar.gz"
 
-cp -pr src bin package.json %{buildroot}%{_datadir}/%{name}/
+cp -pr src package.json %{buildroot}%{_datadir}/%{name}/
+mkdir %{buildroot}%{_datadir}/%{name}/bin
+cp bin/tegh %{buildroot}%{_datadir}/%{name}/bin/tegh
 
 echo `%{_datadir}`
 echo "node %{_datadir}/%{name}/bin/tegh" > %{buildroot}%{_bindir}/tegh

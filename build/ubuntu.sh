@@ -20,7 +20,9 @@ rsync -a ubuntu-src/ ${SRC}/
 mkdir -p ${SYSROOT}/opt/tegh
 
 rsync -a ../src/ ${SYSROOT}/opt/tegh/src --delete
-rsync -a ../bin/ ${SYSROOT}/opt/tegh/bin/ --delete
+rm -f ${SYSROOT}/opt/tegh/bin/
+mkdir -p ${SYSROOT}/opt/tegh/bin/
+cp ../bin/tegh ${SYSROOT}/opt/tegh/bin/tegh
 cp ../README.md ${SYSROOT}/opt/tegh/README.md
 cp ../package.json ${SYSROOT}/opt/tegh/package.json
 
