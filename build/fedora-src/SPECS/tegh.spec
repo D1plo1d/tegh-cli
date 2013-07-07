@@ -12,10 +12,13 @@ Source0:   https://github.com/D1plo1d/tegh/archive/master.tar.gz
 %description
 A simple command line interface for connecting to 3D printers via the Construct Protocol.
 
+# %_datadir /usr/share/
+# %_bindir /usr/bin
 
 %build
 #nothing to do
 
+%define _use_internal_dependency_generator 0
 
 %install
 mkdir -p %{buildroot}%{_bindir}/
@@ -23,11 +26,12 @@ mkdir -p %{buildroot}%{_datadir}/%{name}/
 
 cd %{_builddir}/../../../
 rm -f "%{_topdir}/BUILD/master.tar.gz"
-tar --exclude="./build" -cpzf "/tmp/tegh-fedora-build.tar.gz" "./"
+tar --exclude="./build" --exclude="./.git" -cpzf "/tmp/tegh-fedora-build.tar.gz" "./"
 mv "/tmp/tegh-fedora-build.tar.gz" "%{_topdir}/SOURCES/master.tar.gz"
 
 cp -pr src bin package.json %{buildroot}%{_datadir}/%{name}/
 
+echo `%{_datadir}`
 echo "node %{_datadir}/%{name}/bin/tegh" > %{buildroot}%{_bindir}/tegh
 
 

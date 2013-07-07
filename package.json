@@ -19,6 +19,7 @@
     , "touch": "*"
     , "flavored-path": "*"
     , "native-dns": "*"
+    , "exec-sync": "*"
   },
     "engines": {
     "node": "~0.10.x",
