@@ -13,7 +13,7 @@ makedepends=()
 conflicts=()
 replaces=()
 backup=()
-source=("git+https://github.com/D1plo1d/tegh.git")
+source=("git+https://github.com/D1plo1d/tegh.git#tag=0.2.0")
 sha256sums=('SKIP')
 
 pkgver() {

@@ -23,7 +23,9 @@ task "package", "Package Tegh for ubuntu, fedora, brew (osx) and arch", ->
   fs.copy debFile, path.resolve(packageDir, path.basename debFile)
 
   # Arch
-  #
+  spawn "tar",
+    args: ['-cvzf', path.resolve(packageDir, 'tegh.tar.gz'), 'tegh/PKGBUILD.txt']
+    cwd: path.resolve(buildDir, 'arch-src')
 
   # Brew (OSX)
   #

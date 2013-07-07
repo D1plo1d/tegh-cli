@@ -20,5 +20,6 @@ node_modules
 
 bin/node.exe
 bin/setup.exe
+bin/packages
 build/fedora-src/BUILD/
 

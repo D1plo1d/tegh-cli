@@ -12,7 +12,7 @@ Note: Tegh requires a Construct Server to connect to and print with. In other wo
 
 Download the [Tegh Windows Installer][1]
 
-[1]:https://s3.amazonaws.com/tegh_binaries/tegh-0.2.0-installer.exe
+[1]:https://s3.amazonaws.com/tegh_binaries/0.2.0/tegh-0.2.0-installer.exe
 
 ### OSX / Homebrew
 
@@ -27,7 +27,13 @@ Download the [Tegh Windows Installer][1]
 1. [Install NodeJS from ppa:chris-lea/node.js][2]
 [2]: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
 2. Install [tegh-0.2.0.deb][3]
-[3]: https://s3.amazonaws.com/tegh_binaries/tegh-0.2.0.deb
+[3]: https://s3.amazonaws.com/tegh_binaries/0.2.0/tegh-0.2.0.deb
+
+### Fedora
+
+Install [tegh-0.2.0-1.noarch.rpm][2314]
+
+[2314]:https://s3.amazonaws.com/tegh_binaries/0.2.0/tegh-0.2.0-1.noarch.rpm
 
 ## Useage
 
