@@ -223,7 +223,7 @@ class Tegh
         @client.send(line)
       catch e
         @_append "Error: #{e}"
-    else
+    else if cmd != ""
       @_append """
         Error: '#{cmd}' is not a valid command.
         Try typing 'help' for more info.
