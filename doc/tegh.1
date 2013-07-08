@@ -1,0 +1,33 @@
+.TH TEGH 7 "July 1, 2013" "3D Printing Utilities" "User Commands"
+
+.SH NAME
+tegh \- Tea, Earl Gray, Hot: Discover and use 3D printers
+
+.SH SYNOPSIS
+.B tegh
+
+.SH DESCRIPTION
+On start,
+.B tegh
+discovers 3D printers on your local network and presents a list of discovered printers for the user to select from. Upon selection, the user is dropped into a simple interactive 3D printer interface.
+
+There are presently no command line arguments.
+
+.SH NETWORK DISCOVERY
+
+tegh discovers 3D printers on your local network running the 
+.B construct protocol
+through
+.B MDNS.
+
+As of the time of writing, the only server implementation of the construct protocol is pronterface, so you probably want to be running that on your printer(s). A small Linux machine like a Raspberry Pie is ideal for this.
+
+.SH INTERACTIVE USE
+
+tegh provides an interface for controlling the selected 3D printer through a REPL (Read Evaluate Print Loop) much like BASH or the interactive python interpreter. A variety of commands allow the user to perform different tasks.
+
+The 
+.B help
+command is useful for learning more about the different available commands.
+
+
