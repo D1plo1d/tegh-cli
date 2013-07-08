@@ -16,7 +16,7 @@ Download the [Tegh Windows Installer][1]
 
 ### OSX / Homebrew
 
-`brew install http://git.io/Tgf1Kg --HEAD`
+`brew tap D1plo1d/tegh; brew install tegh`
 
 ### Arch
 
