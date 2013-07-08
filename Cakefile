@@ -6,23 +6,31 @@ glob = require('glob')
 fs = require('fs-extra')
 require("sugar")
 
+packageHelp = "Package Tegh for ubuntu, fedora, brew (osx) and arch"
+distroHelp = 'Package only the specific distro [arch|fedora|ubuntu]'
+option '-d', '--distro [DISTRIBUTION]', distroHelp
 
-task "package", "Package Tegh for ubuntu, fedora, brew (osx) and arch", ->
+task "package", packageHelp, (opts) ->
+  console.log opts.distro
+  distros = if opts.distro then [opts.distro] else ['fedora', 'ubuntu', 'arch']
   buildDir = path.resolve(__dirname, "build")
   packageDir =  path.resolve __dirname, "bin", "packages"
   fs.removeSync packageDir
   fs.mkdirSync packageDir
 
   # Fedora
-  FedoraBuild = require "./build/fedora.coffee"
-  new FedoraBuild().run()
+  if distros.indexOf('fedora') != -1
+    FedoraBuild = require "./build/fedora.coffee"
+    new FedoraBuild().run()
 
   # Ubuntu
-  spawn path.resolve(buildDir, "ubuntu.sh"), cwd: buildDir
-  debFile = glob.sync(path.resolve buildDir, "tegh-*.deb")[0]
-  fs.copy debFile, path.resolve(packageDir, path.basename debFile)
+  if distros.indexOf('ubuntu') != -1
+    spawn path.resolve(buildDir, "ubuntu.sh"), cwd: buildDir
+    debFile = glob.sync(path.resolve buildDir, "tegh-*.deb")[0]
+    fs.copy debFile, path.resolve(packageDir, path.basename debFile)
 
   # Arch
-  spawn "tar",
-    args: ['-cvzf', path.resolve(packageDir, 'tegh.tar.gz'), 'tegh/PKGBUILD.txt']
-    cwd: path.resolve(buildDir, 'arch-src')
+  if distros.indexOf('arch') != -1
+    spawn "tar",
+      args: ['-cvzf', path.resolve(packageDir, 'tegh.tar.gz'), 'tegh']
+      cwd: path.resolve(buildDir, 'arch-src')
