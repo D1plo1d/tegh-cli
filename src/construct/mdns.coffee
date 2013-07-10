@@ -21,7 +21,6 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
   dnsSdOpts:
     name: "_construct._tcp.local"
-    # name: "_services._dns-sd._udp.local"
     type: "PTR"
 
   constructor: (@filter) ->
