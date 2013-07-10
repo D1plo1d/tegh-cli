@@ -2,7 +2,7 @@
 pkgname=tegh
 _gitname=tegh
 pkgver=0.2.0
-pkgrel=1
+pkgrel=2
 pkgdesc="A command line client to remotely monitor and control 3D printers running Prontserve."
 url="https://github.com/D1plo1d/tegh"
 arch=('any')
@@ -18,7 +18,7 @@ sha256sums=('SKIP')
 
 pkgver() {
   cd $_gitname
-  echo git describe --always | sed 's|-|.|g'
+  git describe --always | sed 's|-|.|g'
 }
 
 build() {
