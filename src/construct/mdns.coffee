@@ -20,7 +20,8 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     type: "udp"
 
   dnsSdOpts:
-    name: "_services._dns-sd._udp.local"
+    name: "_construct._tcp.local"
+    # name: "_services._dns-sd._udp.local"
     type: "PTR"
 
   constructor: (@filter) ->
@@ -67,12 +68,16 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
   _onMessage: (buffer, rinfo) =>
     packet = DnsPacket.parse(buffer)
-    services = []
+    event = {address: rinfo.address, hostname: null}
+
+    console.log packet.answer
+
     for service in packet.answer
-      continue unless service.data == @filter
-      @emit "serviceUp",
-        address: rinfo.address
-        name: @filter
+      continue unless service.class == 1
+      event.name = service.name.replace(".local", '') if service.type == 1
+      # This would add ipv6 if we supported it:
+      # event.address = service.address if service.type == 28
+    @emit "serviceUp", event
 
 
 new DnsSdDiscoverer()

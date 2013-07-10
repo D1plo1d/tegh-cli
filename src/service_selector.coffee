@@ -34,10 +34,7 @@ module.exports = class ServiceSelector extends EventEmitter
     `util.print("\u001b[2J\u001b[0;0H")`
     @cursor
       .hide()
-      .write("Select a Printer with ")
-      .red()
-      .write("[ENTER]")
-      .reset()
+      .write("Select a Printer [ Press ENTER ]")
       .write(":\n\n")
     max = @services.list.length - 1
     @selected_index = max if @selected_index > max
@@ -45,10 +42,12 @@ module.exports = class ServiceSelector extends EventEmitter
 
     for service, i in @services.list
       selected = i == @selected_index
-      prefix = if selected then ">" else " "
 
-      @cursor.fg.green() if selected
-      @cursor.write "  #{prefix}  #{service.address}\n"
+      @cursor.write " ["
+      @cursor.fg.white()
+      @cursor.write if selected then "*" else " "
+      @cursor.fg.reset()
+      @cursor.write "] #{service.name} (#{service.address})\n"
       @cursor.reset().bg.reset()
 
     if @services.list.length == 0
