@@ -11,7 +11,7 @@
     , "js-yaml": "*"
     , "glob": "*"
     , "request": "*"
-    , "form-data": "*"
+    , "form-data": "git+https://github.com/D1plo1d/node-form-data.git"
     , "websocket": "*"
     , "keypress": ">=0.2"
     , "ansi": "*"

@@ -36,7 +36,7 @@ module.exports = class ConstructClient extends EventEmitter
       @_unblock()
 
   # sends the add_job command as a http post multipart form request
-  _add_job: (msg) ->
+  _add_job: (msg) =>
     filePath = msg.replace(/^add_job/, "").trim()
 
     throw "#{filePath} does not exist" unless fs.existsSync filePath
@@ -44,7 +44,7 @@ module.exports = class ConstructClient extends EventEmitter
     throw "#{filePath} is not a file" if fs.lstatSync(filePath).isDirectory()
 
     form = new FormData()
-    # form.append('session_uuid', @session_uuid)
+
     form.append('job', fs.createReadStream(filePath))
 
     opts = 
