@@ -91,7 +91,11 @@ class CliConsole
 
     c.savePosition().goto(0, 0)
     c.black().bg.white()
-    c.write(lHeader.padRight(" ", @width - lHeader.length - rHeader.length))
+
+    # The 10 character padding is to offset against ascii color codes in the 
+    # header.
+    rHeaderLength = rHeader.length - Object.keys(@src._sensors).length*10
+    c.write lHeader.padRight(" ", @width - lHeader.length - rHeaderLength)
     c.write(rHeader)
     c.reset().bg.reset()
 
@@ -189,7 +193,19 @@ class Tegh
   _lHeader: ->
     fields = []
     for k, v of @_sensors
-      s = "#{k.capitalize()}: #{v} / #{@_targetTemp[k]||0}\u00B0C"
+      if v > 100
+        color = "\x1b[41m"
+      else if v > 60
+        color = "\x1b[43m"
+      else
+        color = "\x1b[44m"
+
+      vString = "#{v.round(1)}#{if v%1 > 0 then "" else ".0"}"
+      vString = vString.padLeft(" ", 5 - vString.length)
+
+      s = "#{k.capitalize()}: #{color} #{vString}"
+      s += " / #{@_targetTemp[k]||0}\u00B0C \x1b[47m"
+
       if @_targetTempEta[k]? and @_targetTempEta[k].eta > 0
         s+= " (#{@_targetTempEta[k].eta.round(1)} seconds)"
       fields.push s

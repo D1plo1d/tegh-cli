@@ -69,8 +69,6 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     packet = DnsPacket.parse(buffer)
     event = {address: rinfo.address, hostname: null}
 
-    console.log packet.answer
-
     for service in packet.answer
       continue unless service.class == 1
       event.name = service.name.replace(".local", '') if service.type == 1
