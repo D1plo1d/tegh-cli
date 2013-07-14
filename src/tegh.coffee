@@ -161,6 +161,7 @@ class Tegh
     if @_uploading = true
       @_uploading = null
       console.log ""
+    delete @cli.rl._ttyWrite
     @cli.rl.resume()
     @cli.rl.prompt()
     @cli.render()
@@ -212,7 +213,6 @@ class Tegh
     words = line.split(/\s/)
     cmd = words.shift()
     if cmd == "add_job"
-      opts = total: 100, width: 40
       @_renderProgressBar()
       @_uploading = true
 
@@ -229,6 +229,8 @@ class Tegh
         Try typing 'help' for more info.
       """
     @cli.render()
+    # Temporarily overriding readline's _ttyWrite to pause the CLI input.
+    @cli.rl._ttyWrite = ( -> )
 
   _appendHelp: (cmd) ->
     return @_appendSpecificHelp(cmd) if cmd? and cmd.length > 0
