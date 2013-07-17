@@ -225,7 +225,8 @@ class Tegh
 
 
   _parseLine: (line) =>
-    line = line.toString()
+    line = line.toString().trim()
+    return if line == ""
     words = line.split(/\s/)
     cmd = words.shift()
     if cmd == "add_job"
@@ -233,20 +234,22 @@ class Tegh
       @_uploading = true
 
     if cmd == "help" then @_appendHelp(words[0])
-    else if cmd == "exit" then return process.exit()
+    else if cmd == "exit" then process.exit()
     else if @commands[cmd]?
       try
         @client.send(line)
+        @cli.render()
+        # Temporarily overriding readline's _ttyWrite to pause the CLI input.
+        @cli.rl._ttyWrite = ( -> )
+        return
       catch e
         @_append "Error: #{e}"
-    else if cmd != ""
+    else
       @_append """
         Error: '#{cmd}' is not a valid command.
         Try typing 'help' for more info.
       """
     @cli.render()
-    # Temporarily overriding readline's _ttyWrite to pause the CLI input.
-    @cli.rl._ttyWrite = ( -> )
 
   _appendHelp: (cmd) ->
     return @_appendSpecificHelp(cmd) if cmd? and cmd.length > 0
