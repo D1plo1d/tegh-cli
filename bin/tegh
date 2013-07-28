@@ -3,5 +3,5 @@ path = require('path');
 fs   = require('fs');
 src  = path.join(path.dirname(fs.realpathSync(__filename)), '../src');
 
-require('coffee-script');
+require('coffee-script-redux/register');
 require(path.join(src, "tegh"));

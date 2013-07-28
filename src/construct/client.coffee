@@ -32,14 +32,17 @@ module.exports = class ConstructClient extends EventEmitter
       else
         @connection.sendUTF msg
     catch e
-      @emit "construct_error", e
+      @emit "construct_error", {message: e}
       @_unblock()
 
   # sends the add_job command as a http post multipart form request
   _add_job: (msg) =>
     filePath = msg.replace(/^add_job/, "").trim()
 
-    throw "#{filePath} does not exist" unless fs.existsSync filePath
+    if !filePath? or filePath.length == 0
+      throw "add_job requires a file path (ex: add_job ~/myfile.gcode)"
+    unless fs.existsSync filePath
+      throw "No such file: #{filePath}"
 
     throw "#{filePath} is not a file" if fs.lstatSync(filePath).isDirectory()
 
@@ -51,7 +54,7 @@ module.exports = class ConstructClient extends EventEmitter
       host: @host
       port: @port
       path: "/jobs?session_uuid=#{@session_uuid}"
-      auth: "#{@host}:#{@port}"
+      auth: "#{@user}:#{@password}"
     form.submit opts, (err, res) =>
       if err?
         @emit "construct_error", err
@@ -72,14 +75,18 @@ module.exports = class ConstructClient extends EventEmitter
     @session_uuid = data.session_uuid
 
   _onMessage: (m) =>
-    message = JSON.parse m.utf8Data
-    # console.log message
-    @emit "message", message
+    messages = JSON.parse m.utf8Data
+    # console.log messages
 
-    for k,v of message
-      @emit (if k == "error" then "construct_#{k}" else k), v
-
-    @_unblock() if Object.has(message, "ack") or Object.has(message, "error")
+    for msg in messages
+      @emit "message", msg
+      type = (if msg.type == "error" then "construct_error" else msg.type)
+      @emit type, msg.data, msg.target
+      if type.endsWith("_changed")
+        @emit "change", type.remove("_changed"), msg.data, msg.target
+      # Unblocking if a synchronous error is thrown or the message was ack'd
+      syncError = msg.type == "error" and msg.data.type.endsWith(".sync")
+      @_unblock() if msg.type == "ack" or syncError
 
   _unblock: ->
     @blocking = false

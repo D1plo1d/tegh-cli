@@ -31,7 +31,7 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
     for type, address of @multicastAddresses
       @_makeMdnsRequest type, address
-    setTimeout(@close, 2000);
+    setTimeout(@close, 2000)
 
   _makeMdnsRequest: (type, address) ->
     server = 

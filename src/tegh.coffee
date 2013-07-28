@@ -20,8 +20,9 @@ getUserHome = ->
   drive + (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE)
 
 longestPrefix = (a, b) ->
-  for i in [1..a.length]
-    return a[0..-i] if b.startsWith(a[0..-i])
+  longest = null
+  longest ?= a[0..-i] for i in [1..a.length] when b.startsWith(a[0..-i])
+  return longest
 
 class CliConsole
   historyPath: "#{getUserHome()}/.construct_history"
@@ -94,7 +95,7 @@ class CliConsole
 
     # The 10 character padding is to offset against ascii color codes in the 
     # header.
-    rHeaderLength = rHeader.length - Object.keys(@src._sensors).length*10
+    rHeaderLength = rHeader.length - Object.keys(@src.tempDevices).length*10
     c.write lHeader.padRight(" ", @width - lHeader.length - rHeaderLength)
     c.write(rHeader)
     c.reset().bg.reset()
@@ -106,49 +107,33 @@ class CliConsole
 
 class Tegh
   commands: require './help'
-  _jobProgress: 0
-  _sensorMap: {e: 'extruder', e0: 'extruder', b: 'bed'}
+  tempDevices: {}
 
   constructor: ->
     new ServiceSelector().on "select", @_onServiceSelect
-    @_sensors = {}
-    @_targetTemp = {}
-    @_targetTempEta = {}
 
   _onServiceSelect: (service) =>
     clear()
     port = 8888
     stdout.write "Connecting to #{service.address}:#{port}..."
     @client = new ConstructClient(service.address, port)
-      .on("connect", @_onConnect)
+      .on("initialized", @_onInit)
+      .on("job_started", @_onJobStarted)
+      .on("change", @_onChange)
       .on("job_upload_progress_changed", @_renderProgressBar)
-      .on("sensor_changed", @_onSensorChanged)
-      .on("target_temp_changed", @_onTargetTempChanged)
-      .on("target_temp_progress_changed", @_onTargetTempProgressChanged)
-      .on("job_progress_changed", @_onJobChanged)
       .on("ack", @_onAck)
       .on("construct_error", @_onError)
       .on("unblocked", @_onUnblocked)
       .on("close", @_onClose)
-    # @client = new ConstructClient(service.host[0..-2], service.port)
 
-  _onConnect: =>
+  _onInit: (data) =>
+    @printer = data
+    @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
     @cli = new CliConsole(@)
 
-  _onTargetTempChanged: (data) =>
-    @_targetTemp[@_sensorMap[k]] = v for k, v of data
-    @cli.render()
-
-  _onTargetTempProgressChanged: (data) =>
-    @_targetTempEta[@_sensorMap[k]] = v for k, v of data
-    @cli.render()
-
-  _onSensorChanged: (data) =>
-    @_sensors[data.name] = data.value
-    @cli.render()
-
-  _onJobChanged: (data) =>
-    @_jobProgress = data
+  _onChange: (key, value, target) =>
+    return if key == "job_upload_progress"
+    (if target? then @printer[target] else @printer)[key] = value
     @cli.render()
 
   _onClose: =>
@@ -159,10 +144,11 @@ class Tegh
     @_onJobList(data.jobs) if data?.jobs?
 
   _onError: (data) =>
+    console.log "" if @_uploading == true
     @_append "Error: #{data.message}"
 
   _onUnblocked: =>
-    if @_uploading = true
+    if @_uploading?
       @_uploading = null
       console.log ""
     delete @cli.rl._ttyWrite
@@ -170,16 +156,24 @@ class Tegh
     @cli.rl.prompt()
     @cli.render()
 
+  _onJobStarted: (job) =>
+    stdout.write "\r" + "Printing #{job.file_name}".green
+    console.log()
+    @cli.render()
+    @cli.rl.prompt()
+
   _onJobList: (jobs) ->
     @cli.rl.pause()
     stdout.write("\r")
     console.log "Print Jobs:\n"
-    @_printJob(job, i) for job, i in jobs
+    i = 0
+    @_printJob(job, (if job.printing then i else i++)) for job in jobs
     @_append "  There are no jobs in the print queue." if jobs.length == 0
 
   _printJob: (job, i) =>
     name = job.file_name
     id = job.id.toString()
+    if job.printing then i = "X"
     prefix = "  #{i}) #{name} ";
     if job.printing
       suffix = "PRINTING    "
@@ -192,7 +186,10 @@ class Tegh
 
   _lHeader: ->
     fields = []
-    for k, v of @_sensors
+    for k in Object.keys(@tempDevices).sort()
+      data = @tempDevices[k]
+      v = data.current_temp
+      eta = data.target_temp_progress.eta || 0
       if v > 100
         color = "\x1b[41m"
       else if v > 60
@@ -204,15 +201,17 @@ class Tegh
       vString = vString.padLeft(" ", 5 - vString.length)
 
       s = "#{k.capitalize()}: #{color} #{vString}"
-      s += " / #{@_targetTemp[k]||0}\u00B0C \x1b[47m"
+      s += " / #{data.target_temp||0}\u00B0C \x1b[47m"
 
-      if @_targetTempEta[k]? and @_targetTempEta[k].eta > 0
-        s+= " (#{@_targetTempEta[k].eta.round(1)} seconds)"
+      s+= " (#{eta.round(1)} seconds)" if eta > 0
       fields.push s
     fields.join("  ")
 
   _rHeader: ->
-    "#{@_jobProgress.format(2)}% Complete "
+    status = "Status: #{@printer.status.capitalize()} "
+    if @printer.status == "printing"
+      status +="( #{@printer.job_progress.format(2)}% ) "
+    status
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
@@ -237,10 +236,11 @@ class Tegh
     else if cmd == "exit" then process.exit()
     else if @commands[cmd]?
       try
-        @client.send(line)
-        @cli.render()
         # Temporarily overriding readline's _ttyWrite to pause the CLI input.
         @cli.rl._ttyWrite = ( -> )
+        # Sending the command
+        @client.send(line)
+        @cli.render()
         return
       catch e
         @_append "Error: #{e}"
@@ -331,9 +331,6 @@ class Tegh
     # Attempting to find a common prefix in all the matched paths and 
     # autocomplete that prefix.
     shortest = out.reduce longestPrefix, out[0]
-    # console.log shortest
-    # console.log shortest
-    # console.log shortest
     absPath = shortest if shortest? and shortest.length > absPath.length
 
     # If there is only 1 result set the current REPL line to it's 
