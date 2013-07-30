@@ -118,22 +118,25 @@ class Tegh
     stdout.write "Connecting to #{service.address}:#{port}..."
     @client = new ConstructClient(service.address, port)
       .on("initialized", @_onInit)
-      .on("job_started", @_onJobStarted)
       .on("change", @_onChange)
-      .on("job_upload_progress_changed", @_renderProgressBar)
       .on("ack", @_onAck)
       .on("construct_error", @_onError)
       .on("unblocked", @_onUnblocked)
       .on("close", @_onClose)
 
   _onInit: (data) =>
+    console.log data
     @printer = data
     @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
     @cli = new CliConsole(@)
 
-  _onChange: (key, value, target) =>
-    return if key == "job_upload_progress"
-    (if target? then @printer[target] else @printer)[key] = value
+  _onChange: (value, path) =>
+    @_renderProgressBar(value) if path.last() == 'job_upload_progress'
+    # Finding the target from it's path, updating it and re-rendering
+    parent = @printer
+    parent = (parent[k] ?= {}) for k in path[..-2]
+    parent[path.last()] = value
+    @_onJobStarted(parent) if path[0] == 'jobs' and path.last() == 'status'
     @cli.render()
 
   _onClose: =>
@@ -159,7 +162,6 @@ class Tegh
   _onJobStarted: (job) =>
     stdout.write "\r" + "Printing #{job.file_name}".green
     console.log()
-    @cli.render()
     @cli.rl.prompt()
 
   _onJobList: (jobs) ->
@@ -167,21 +169,22 @@ class Tegh
     stdout.write("\r")
     console.log "Print Jobs:\n"
     i = 0
-    @_printJob(job, (if job.printing then i else i++)) for job in jobs
+    for job in jobs
+      @_printJob(job, (if job.status == 'printing' then i else i++))
     @_append "  There are no jobs in the print queue." if jobs.length == 0
 
   _printJob: (job, i) =>
     name = job.file_name
     id = job.id.toString()
-    if job.printing then i = "X"
+    if job.status == 'printing' then i = "X"
     prefix = "  #{i}) #{name} ";
-    if job.printing
+    if job.status == 'printing'
       suffix = "PRINTING    "
     else
       suffix = "job ##{job.id.pad(5)}  "
     padding = @cli.width - suffix.length - prefix.length - 1
     line = "#{prefix.padRight(".", padding)} #{suffix}"
-    line = line.green if job.printing
+    line = line.green if job.status == 'printing'
     console.log line
 
   _lHeader: ->
@@ -189,7 +192,7 @@ class Tegh
     for k in Object.keys(@tempDevices).sort()
       data = @tempDevices[k]
       v = data.current_temp
-      eta = data.target_temp_progress.eta || 0
+      countdown = data.target_temp_countdown || 0
       if v > 100
         color = "\x1b[41m"
       else if v > 60
@@ -203,25 +206,29 @@ class Tegh
       s = "#{k.capitalize()}: #{color} #{vString}"
       s += " / #{data.target_temp||0}\u00B0C \x1b[47m"
 
-      s+= " (#{eta.round(1)} seconds)" if eta > 0
+      s+= " (#{(countdown/1000).round(1)} seconds)" if countdown > 0
       fields.push s
     fields.join("  ")
 
   _rHeader: ->
     status = "Status: #{@printer.status.capitalize()} "
-    if @printer.status == "printing"
-      status +="( #{@printer.job_progress.format(2)}% ) "
-    status
+    return status if @printer.status != "printing"
+    total = 0
+    current = 0
+    for k, job of @printer.jobs when job.status == "printing"
+      total += job.total_lines
+      current += job.current_line
+    return status + "( #{(current / total).format(2)}% ) "
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
 
-  _renderProgressBar: (data) =>
-    p = (if data? then data.uploaded / data.total * 100 else 0).round()
+  _renderProgressBar: (data = {uploaded: 0, total: 1}) =>
+    p = (data.uploaded / data.total * 100).round()
     bar = "#{''.pad "#", (p*2/10).round()}#{''.pad '.', (20-p*2/10).round()}"
     percent = "#{if p > 10 then "" else " "}#{p.round(1)}"
-    stdout.write "\ruploading [#{bar}] #{percent}%"
-
+    c = @cli.cursor
+    c.hide().goto(0, @cli.height+1).write "uploading [#{bar}] #{percent}%"
 
   _parseLine: (line) =>
     line = line.toString().trim()
@@ -229,7 +236,9 @@ class Tegh
     words = line.split(/\s/)
     cmd = words.shift()
     if cmd == "add_job"
+      console.log("")
       @_renderProgressBar()
+      @cli.render()
       @_uploading = true
 
     if cmd == "help" then @_appendHelp(words[0])

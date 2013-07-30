@@ -3,5 +3,8 @@ path = require('path');
 fs   = require('fs');
 src  = path.join(path.dirname(fs.realpathSync(__filename)), '../src');
 
-require('coffee-script-redux/register');
+// Coffeescript 1.0 and 2.0 respectively. Comment out the one you aren't using.
+require('coffee-script');
+// require('coffee-script-redux/register');
+
 require(path.join(src, "tegh"));

@@ -82,8 +82,6 @@ module.exports = class ConstructClient extends EventEmitter
       @emit "message", msg
       type = (if msg.type == "error" then "construct_error" else msg.type)
       @emit type, msg.data, msg.target
-      if type.endsWith("_changed")
-        @emit "change", type.remove("_changed"), msg.data, msg.target
       # Unblocking if a synchronous error is thrown or the message was ack'd
       syncError = msg.type == "error" and msg.data.type.endsWith(".sync")
       @_unblock() if msg.type == "ack" or syncError

@@ -56,9 +56,10 @@ module.exports =
       "Disable the printer's motors": "set motors off"
       "Enable the printer's fan": "set fan on"
       "Disable the printer's fan": "set fan off"
+      "Enable the printer's conveyor or ABP": "set conveyor on"
+      "Disable the printer's conveyor or ABP": "set conveyor off"
       # Proposed Additions:
       #   set temp e0:220 e1:0 b:100
-      #   set temp 220
       #   set feedrate xy: 100 z: 1
   estop:
     description: """
@@ -91,11 +92,11 @@ module.exports =
     # description: """
     #   Change a print job's quantity or position in the queue.
     # """
-    required_args: ["job_id"]
+    required_args: ["id"]
     optional_args: ["position"] # ["qty", "position"]
     examples:
-      "move job #3 to the top of the queue": "change_job 3 position: 0"
-      "make job #12 the second next job in the queue": "change_job 12 position: 1"
+      "move job #3 to the top of the queue": "change_job id: 3 position: 0"
+      "make job #12 the second next job in the queue": "change_job id: 12 position: 1"
   get_jobs:
     description: """
       Gets a list of the jobs in the printer's queue.
