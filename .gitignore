@@ -18,8 +18,7 @@ results
 npm-debug.log
 node_modules
 
-bin/node.exe
-bin/setup.exe
+bin/*.exe
 bin/packages
 build/fedora-src/BUILD/
 
