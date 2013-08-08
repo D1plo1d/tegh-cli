@@ -12,11 +12,36 @@ option '-d', '--distro [DISTRIBUTION]', distroHelp
 
 task "package", packageHelp, (opts) ->
   console.log opts.distro
-  distros = if opts.distro then [opts.distro] else ['fedora', 'ubuntu', 'arch']
+  if opts.distro
+    distros = [opts.distro]
+  else
+    distros = ['osx','fedora', 'ubuntu', 'arch']
+
   buildDir = path.resolve(__dirname, "build")
   packageDir =  path.resolve __dirname, "bin", "packages"
   fs.removeSync packageDir
   fs.mkdirSync packageDir
+
+  # OSX
+  if distros.indexOf('osx') != -1
+    VERSION = "0.2.0"
+    brew_tar_path = path.resolve(packageDir, "tegh-#{VERSION}-brew.tar.gz")
+    console.log brew_tar_path
+    cmd = "tar -cvzf '#{brew_tar_path}'"
+    cmd += " --include='doc' --include='bin' --include='src'"
+    cmd += " --include='LICENSE' --include='node_modules'"
+    cmd += " --exclude='bin/packages'"
+    cmd += " ./*"
+    console.log cmd
+    sha1 = false
+    _onData = (error, stdout, stderr) ->
+      console.log('stdout: ' + stdout)
+      console.log('stderr: ' + stderr)
+      console.log('exec error: ' + error) if (error != null)
+      if sha1 == false
+        sha1 = true
+        exec("openssl sha1 #{brew_tar_path}", _onData)
+    proc = exec cmd, cwd: __dirname, maxBuffer: 10*1024*1024, _onData
 
   # Fedora
   if distros.indexOf('fedora') != -1
