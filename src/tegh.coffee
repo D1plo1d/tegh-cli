@@ -125,7 +125,6 @@ class Tegh
       .on("close", @_onClose)
 
   _onInit: (data) =>
-    console.log data
     @printer = data
     @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
     @cli = new CliConsole(@)

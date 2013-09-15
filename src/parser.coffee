@@ -29,12 +29,12 @@ parseSetArguments = (args) ->
 
 toJSON = (msg) ->
   words = msg.words()
-  args = words[1..].map preprocessArgument
+  args = words[1..].compact().map preprocessArgument
 
   # Figure out if the arguments are a hash
   isHash = true
   for i in [0..args.length-1]
-    key = args[i]
+    continue unless key = args[i]
     isHash &&= i.isOdd() or key.match(/[^:]+:|@/)?
 
   if words.length < 2
