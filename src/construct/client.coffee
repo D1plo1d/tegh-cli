@@ -58,7 +58,7 @@ module.exports = class ConstructClient extends EventEmitter
     opts = 
       host: @host
       port: @port
-      path: "/jobs?session_uuid=#{@session_uuid}"
+      path: "#{@path}jobs?session_uuid=#{@session_uuid}"
       auth: "#{@user}:#{@password}"
     form.submit opts, (err, res) =>
       if err?
