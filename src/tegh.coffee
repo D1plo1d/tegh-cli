@@ -130,13 +130,12 @@ class Tegh
     @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
     @cli = new CliConsole(@)
 
-  _onChange: (value, path) =>
-    @_renderProgressBar(value) if path.last() == 'job_upload_progress'
+  _onChange: (data, target) =>
+    @_renderProgressBar(data) if target == 'job_upload_progress'
     # Finding the target from it's path, updating it and re-rendering
-    parent = @printer
-    parent = (parent[k] ?= {}) for k in path[..-2]
-    parent[path.last()] = value
-    @_onJobStarted(parent) if path[0] == 'jobs' and path.last() == 'status'
+
+    Object.merge @printer[target], data
+    @_onJobStarted(parent) if target.startsWith('job') and data.status?
     @cli.render()
 
   _onClose: =>
