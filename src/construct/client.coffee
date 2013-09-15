@@ -4,6 +4,7 @@ request = require 'request'
 FormData = require 'form-data'
 sugar = require 'sugar'
 fs = require 'fs-extra'
+parser = require '../parser'
 
 stdout = process.stdout
 
@@ -22,22 +23,25 @@ module.exports = class ConstructClient extends EventEmitter
 
     #new WebSocketClient "ws://#{@host}:8000/#{@port}", "construct"
     url = "ws://#{@host}:#{@port}#{@path}socket?user=#{@user}&password=#{@password}"
-    console.log url
+    # console.log url
     @socket.connect url, "construct.text.0.3"
 
   send: (msg) =>
     @blocking = true
     try
-      if msg.indexOf("add_job") == 0
-        @_add_job(msg)
-      else
-        @connection.sendUTF msg
+      @_attemptSend(msg)
     catch e
       @emit "construct_error", {message: e}
       @_unblock()
 
+  _attemptSend: (msg) =>
+    return @_addJob(msg) if msg.indexOf("add_job") == 0
+    json = parser.toJSON(msg)
+    # console.log json
+    @connection.sendUTF json
+
   # sends the add_job command as a http post multipart form request
-  _add_job: (msg) =>
+  _addJob: (msg) =>
     filePath = msg.replace(/^add_job/, "").trim()
 
     if !filePath? or filePath.length == 0
