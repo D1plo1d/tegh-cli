@@ -81,7 +81,7 @@ module.exports = class ConstructClient extends EventEmitter
 
   _onMessage: (m) =>
     messages = JSON.parse m.utf8Data
-    console.log messages
+    # console.log messages
 
     for msg in messages
       @emit "message", msg

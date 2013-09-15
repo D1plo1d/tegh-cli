@@ -50,7 +50,7 @@ toJSON = (msg) ->
       data[key] = val
   else
     data = args
-  console.log data
+  # console.log data
   return JSON.stringify
     action: words[0]
     data: data
