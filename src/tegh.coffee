@@ -114,9 +114,9 @@ class Tegh
 
   _onServiceSelect: (service) =>
     clear()
-    port = 8888
-    stdout.write "Connecting to #{service.address}:#{port}..."
-    @client = new ConstructClient(service.address, port)
+    port = 2540
+    stdout.write "Connecting to #{service.address}/#{service.serviceName}..."
+    @client = new ConstructClient(service.address, port, service.path)
       .on("initialized", @_onInit)
       .on("change", @_onChange)
       .on("ack", @_onAck)

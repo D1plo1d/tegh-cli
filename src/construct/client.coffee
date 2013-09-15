@@ -10,7 +10,7 @@ stdout = process.stdout
 module.exports = class ConstructClient extends EventEmitter
   blocking: false
 
-  constructor: (@host, @port) ->
+  constructor: (@host, @port, @path) ->
     @user = "admin"
     @password = "admin"
 
@@ -21,8 +21,9 @@ module.exports = class ConstructClient extends EventEmitter
     @socket.on 'connectFailed', @_onConnectionFailed
 
     #new WebSocketClient "ws://#{@host}:8000/#{@port}", "construct"
-    url = "ws://#{@host}:#{@port}/socket?user=#{@user}&password=#{@password}"
-    @socket.connect url, "construct.text.0.2"
+    url = "ws://#{@host}:#{@port}#{@path}socket?user=#{@user}&password=#{@password}"
+    console.log url
+    @socket.connect url, "construct.text.0.3"
 
   send: (msg) =>
     @blocking = true
@@ -76,7 +77,7 @@ module.exports = class ConstructClient extends EventEmitter
 
   _onMessage: (m) =>
     messages = JSON.parse m.utf8Data
-    # console.log messages
+    console.log messages
 
     for msg in messages
       @emit "message", msg

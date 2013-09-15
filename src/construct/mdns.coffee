@@ -71,7 +71,12 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
     for service in packet.answer
       continue unless service.class == 1
+      console.log service.data
+      event.serviceName = serviceName = service.data.split(".")[0]
+      event.path = "/printers/#{serviceName}/"
+      event.name = 'localhost'
       event.name = service.name.replace(".local", '') if service.type == 1
+      event.name += "/#{serviceName}"
       # This would add ipv6 if we supported it:
       # event.address = service.address if service.type == 28
     @emit "serviceUp", event
