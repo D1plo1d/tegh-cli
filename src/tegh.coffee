@@ -118,6 +118,8 @@ class Tegh
     stdout.write "Connecting to #{service.address}/#{service.serviceName}..."
     @client = new ConstructClient(service.address, port, service.path)
       .on("initialized", @_onInit)
+      .on("add", @_onAdd)
+      .on("rm", @_onRm)
       .on("change", @_onChange)
       .on("ack", @_onAck)
       .on("construct_error", @_onError)
@@ -128,12 +130,22 @@ class Tegh
     @printer = data
     @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
     @cli = new CliConsole(@)
+    @cli.render()
+
+  _onAdd: (data, target) =>
+    @printer[target] = data
+
+  _onRm: (data, target) =>
+    delete @printer[target]
 
   _onChange: (data, target) =>
     @_renderProgressBar(data) if target == 'job_upload_progress'
     # Finding the target from it's path, updating it and re-rendering
 
-    Object.merge @printer[target], data
+    if Object.isObject data
+      Object.merge @printer[target], data
+    else
+      @printer[target] = data
     @_onJobStarted @printer[target] if target.startsWith('job') and data.status?
     @cli.render()
 
@@ -158,6 +170,7 @@ class Tegh
     @cli.render()
 
   _onJobStarted: (job) =>
+    console.log job
     stdout.write "\r" + "Printing #{job.file_name}".green
     console.log()
     @cli.rl.prompt()
@@ -213,10 +226,11 @@ class Tegh
     return status if @printer.status != "printing"
     total = 0
     current = 0
-    for k, job of @printer.jobs when job.status == "printing"
-      total += job.total_lines
-      current += job.current_line
-    return status + "( #{(current / total).format(2)}% ) "
+    for job in @printer.jobs
+      continue unless job.status == "printing"
+      total += job.total_lines || 0
+      current += job.current_line || 0
+    return status + "( #{((current / total) || 0).format(2)}% ) "
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
