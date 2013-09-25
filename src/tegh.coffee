@@ -134,7 +134,7 @@ class Tegh
     # Finding the target from it's path, updating it and re-rendering
 
     Object.merge @printer[target], data
-    @_onJobStarted(parent) if target.startsWith('job') and data.status?
+    @_onJobStarted @printer[target] if target.startsWith('job') and data.status?
     @cli.render()
 
   _onClose: =>

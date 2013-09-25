@@ -70,8 +70,7 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     event = {address: rinfo.address, hostname: null}
 
     for service in packet.answer
-      continue unless service.class == 1
-      console.log service.data
+      continue unless service.class == 1 and service.data?
       event.serviceName = serviceName = service.data.split(".")[0]
       event.path = "/printers/#{serviceName}/"
       event.name = 'localhost'

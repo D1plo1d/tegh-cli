@@ -80,6 +80,7 @@ module.exports = class ConstructClient extends EventEmitter
     @session_uuid = data.session_uuid
 
   _onMessage: (m) =>
+    # console.log m.utf8Data
     messages = JSON.parse m.utf8Data
     # console.log messages
 
