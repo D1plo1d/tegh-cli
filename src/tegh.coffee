@@ -170,7 +170,6 @@ class Tegh
     @cli.render()
 
   _onJobStarted: (job) =>
-    console.log job
     stdout.write "\r" + "Printing #{job.file_name}".green
     console.log()
     @cli.rl.prompt()
@@ -221,12 +220,16 @@ class Tegh
       fields.push s
     fields.join("  ")
 
+
+  jobs: =>
+    Object.values Object.select @printer, /^jobs\[/
+
   _rHeader: ->
     status = "Status: #{@printer.status.capitalize()} "
     return status if @printer.status != "printing"
     total = 0
     current = 0
-    for job in @printer.jobs
+    for job in @jobs()
       continue unless job.status == "printing"
       total += job.total_lines || 0
       current += job.current_line || 0
