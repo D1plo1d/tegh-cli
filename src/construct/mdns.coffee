@@ -27,13 +27,17 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
   start: ->
     @start = Date.now()
-    @_sockets = []
 
+    @makeAllMdnsRequests()
+    @mdnsInterval = setInterval(@makeAllMdnsRequests, 100)
+
+  makeAllMdnsRequests: =>
+    @_sockets = []
     for type, address of @multicastAddresses
       @_makeMdnsRequest type, address
-    setTimeout(@close, 2000)
+    setTimeout(@close.fill(@_sockets), 2000)
 
-  _makeMdnsRequest: (type, address) ->
+  _makeMdnsRequest: (type, address) =>
     server = 
       port: @mdnsServer.port
       type: @mdnsServer.type
@@ -59,26 +63,26 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     dg.ref()
     @_sockets.push dg
 
-  close: =>
-    for socket in @_sockets
+  close: (sockets) =>
+    for socket in sockets
       socket.unref()
       socket.close()
     # console.log "Closing the MDNS discovery udp connections"
 
   _onMessage: (buffer, rinfo) =>
     packet = DnsPacket.parse(buffer)
-    event = {address: rinfo.address, hostname: null}
+    event = {address: rinfo.address, hostname: null, name: rinfo.address}
 
     for service in packet.answer
       continue unless service.class == 1 and service.data?
       event.serviceName = serviceName = service.data.split(".")[0]
       event.path = "/printers/#{serviceName}/"
-      event.name = 'localhost'
       event.name = service.name.replace(".local", '') if service.type == 1
       event.name += "/#{serviceName}"
       # This would add ipv6 if we supported it:
       # event.address = service.address if service.type == 28
     @emit "serviceUp", event
+    clearInterval @mdnsInterval
 
 
 new DnsSdDiscoverer()

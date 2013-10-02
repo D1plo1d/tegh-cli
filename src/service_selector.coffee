@@ -50,8 +50,8 @@ module.exports = class ServiceSelector extends EventEmitter
 
     if @services.list.length == 0
       @cursor
-        .yellow().underline()
-        .write("\nNo construct servers were found\n")
+        .green().underline()
+        .write("\nLocating Printers..\n")
         .reset().brightWhite()
         .write(" - check that your printer is connected to the network\n\n")
         .reset()

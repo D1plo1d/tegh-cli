@@ -128,6 +128,7 @@ class Tegh
 
   _onInit: (data) =>
     @printer = data
+    # console.log @printer
     @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
     @cli = new CliConsole(@)
     @cli.render()
@@ -201,6 +202,8 @@ class Tegh
     fields = []
     for k in Object.keys(@tempDevices).sort()
       data = @tempDevices[k]
+      # console.log k
+      # console.log data
       v = data.current_temp
       countdown = data.target_temp_countdown || 0
       if v > 100
@@ -342,15 +345,17 @@ class Tegh
     out[0] = out[0] + " " if out.length == 1
     out
 
-  _autocomplete_dir: (out, words, line) ->
+  _fileTypes: /\.(gcode|ngc|stl|amf|obj)/
+
+  _autocomplete_dir: (out, words, line) =>
     # Creating a glob to find files that start with the path
     # the user is building.
     words[1] = "~" if words[1] == "~/"
     relative = (words[1]||"").indexOf("~") == 0
     absPath = path.get (words[1..]||[""]).join(" ")
 
-    out = glob(absPath + "*", sync: true).filter (p) ->
-      p.endsWith(/\.gcode|.ngc/) or fs.lstatSync(p).isDirectory()
+    out = glob(absPath + "*", sync: true).filter (p) =>
+      p.endsWith(@_fileTypes) or fs.lstatSync(p).isDirectory()
 
     # Attempting to find a common prefix in all the matched paths and 
     # autocomplete that prefix.
