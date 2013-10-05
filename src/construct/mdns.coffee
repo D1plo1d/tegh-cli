@@ -71,16 +71,18 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
   _onMessage: (buffer, rinfo) =>
     packet = DnsPacket.parse(buffer)
-    event = {address: rinfo.address, hostname: null, name: rinfo.address}
+    event = {address: rinfo.address, hostname: null}
+    console.log event
 
     for service in packet.answer
-      continue unless service.class == 1 and service.data?
-      event.serviceName = serviceName = service.data.split(".")[0]
-      event.path = "/printers/#{serviceName}/"
-      event.name = service.name.replace(".local", '') if service.type == 1
-      event.name += "/#{serviceName}"
       # This would add ipv6 if we supported it:
       # event.address = service.address if service.type == 28
+      continue unless service.class == 1 and service.type == 12
+      continue unless service.data?
+      console.log service
+      event.serviceName = serviceName = service.data.split(".")[0]
+      event.path = "/printers/#{serviceName}/"
+    console.log event
     @emit "serviceUp", event
     clearInterval @mdnsInterval
 

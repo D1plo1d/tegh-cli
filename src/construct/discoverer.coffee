@@ -22,7 +22,7 @@ module.exports = class ConstructDiscoverer extends EventEmitter
       .start()
 
   _addServer: (service) =>
-    service.name ?= "localhost" if @local_ips.indexOf(service.address) != 0
+    # service.name ?= "localhost" if @local_ips.indexOf(service.address) != 0
     @list.push service
     @emit "serviceUp", service
 

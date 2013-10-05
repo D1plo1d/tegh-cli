@@ -45,7 +45,7 @@ module.exports = class ServiceSelector extends EventEmitter
 
       @cursor.write " ["
       @cursor.write if selected then "*" else " "
-      @cursor.write "] #{service.name} (#{service.address})\n"
+      @cursor.write "] #{service.serviceName} (#{service.address})\n"
       @cursor.reset().bg.reset()
 
     if @services.list.length == 0
