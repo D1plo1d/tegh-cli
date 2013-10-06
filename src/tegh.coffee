@@ -236,7 +236,7 @@ class Tegh
       continue unless job.status == "printing"
       total += job.total_lines || 0
       current += job.current_line || 0
-    return status + "( #{((current / total) || 0).format(2)}% ) "
+    return status + "( #{((100*current / total) || 0).format(2)}% ) "
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
