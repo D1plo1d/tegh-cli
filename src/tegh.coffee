@@ -192,7 +192,7 @@ class Tegh
       style: { 'padding-left': 1, 'padding-right': 1 }
 
     i = 0
-    for job in jobs
+    for job in jobs.sortBy 'position'
       @_printJob table, job, (if job.status == 'printing' then i else i++)
     if jobs.length == 0
       @_append "  There are no jobs in the print queue."
