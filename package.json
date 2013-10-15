@@ -10,6 +10,7 @@
     , "fs-extra": "*"
     , "js-yaml": "*"
     , "glob": "*"
+    , "cli-table": "*"
     , "request": "*"
     , "form-data": "git+https://github.com/D1plo1d/node-form-data.git"
     , "websocket": "*"

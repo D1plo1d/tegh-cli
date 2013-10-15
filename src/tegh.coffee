@@ -9,6 +9,7 @@ ServiceSelector = require './service_selector'
 fs = require "fs-extra"
 touch = require "touch"
 path = require ("flavored-path")
+Table = require 'cli-table'
 
 stdout = process.stdout
 stdin = process.stdin
@@ -155,7 +156,6 @@ class Tegh
     process.exit()
 
   _onAck: (data) =>
-    @_onJobList(data.jobs) if data?.jobs?
 
   _onError: (data) =>
     console.log "" if @_uploading == true
@@ -175,28 +175,40 @@ class Tegh
     console.log()
     @cli.rl.prompt()
 
-  _onJobList: (jobs) ->
+  _listJobs: =>
+    jobs = []
+    jobs = Object.findAll @printer, (k, v) -> k.startsWith /jobs\[[0-9]+\]$/
+    jobs = Object.values jobs
+
     @cli.rl.pause()
     stdout.write("\r")
     console.log "Print Jobs:\n"
+
+    cols = 12
+    w = Math.round((@cli.width - cols) / cols)
+    table = new Table
+      head: ['Job', 'Qty', 'Status', 'Id']
+      colWidths: [(@cli.width - w*cols) + w*7 - 5, w, w*2, w*2]
+      style: { 'padding-left': 1, 'padding-right': 1 }
+
     i = 0
     for job in jobs
-      @_printJob(job, (if job.status == 'printing' then i else i++))
-    @_append "  There are no jobs in the print queue." if jobs.length == 0
-
-  _printJob: (job, i) =>
-    name = job.file_name
-    id = job.id.toString()
-    if job.status == 'printing' then i = "X"
-    prefix = "  #{i}) #{name} ";
-    if job.status == 'printing'
-      suffix = "PRINTING    "
+      @_printJob table, job, (if job.status == 'printing' then i else i++)
+    if jobs.length == 0
+      @_append "  There are no jobs in the print queue."
     else
-      suffix = "job ##{job.id.pad(5)}  "
-    padding = @cli.width - suffix.length - prefix.length - 1
-    line = "#{prefix.padRight(".", padding)} #{suffix}"
-    line = line.green if job.status == 'printing'
-    console.log line
+      console.log table.toString()
+
+  _printJob: (table, job, i) =>
+    name = job.file_name
+    if job.status == 'printing' then i = "X"
+    prefix = "#{i}) #{name} ";
+    if job.status == 'printing'
+      id = "N/A"
+    else
+      id = job.id.pad(5)
+    table.push [prefix, job.qty, job.status?.capitalize?() || "Queued", id]
+    # line = line.green if job.status == 'printing'
 
   _lHeader: ->
     fields = []
@@ -260,6 +272,7 @@ class Tegh
       @_uploading = true
 
     if cmd == "help" then @_appendHelp(words[0])
+    else if cmd == "get_jobs" then @_listJobs()
     else if cmd == "exit" then process.exit()
     else if @commands[cmd]?
       try
