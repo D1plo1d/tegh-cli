@@ -366,8 +366,9 @@ class Tegh
     # the user is building.
     words[1] = "~" if words[1] == "~/"
     relative = (words[1]||"").indexOf("~") == 0
-    absPath = path.get (words[1..]||[""]).join(" ")
+    absPath = path.normalize path.get (words[1..]||[""]).join(" ")
 
+    # console.log absPath
     out = glob(absPath + "*", sync: true).filter (p) =>
       p.endsWith(@_fileTypes) or fs.lstatSync(p).isDirectory()
 
@@ -383,8 +384,8 @@ class Tegh
       out[0] = ""
 
     isDirectory = fs.existsSync(absPath) and fs.lstatSync(absPath).isDirectory()
-    absPath += '/' if !absPath.endsWith("/") and isDirectory
-    @cli.rl.line = line = "add_job #{absPath}"
+    absPath += path.sep if !absPath.endsWith(/\/|\\/) and isDirectory
+    @cli.rl.line = line = "add_job #{path.normalize absPath}"
     @cli.rl.cursor = line.length
     return [out, line]
 
