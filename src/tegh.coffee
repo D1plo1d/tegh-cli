@@ -97,7 +97,7 @@ class CliConsole
     # The 10 character padding is to offset against ascii color codes in the 
     # header.
     rHeaderLength = rHeader.length - Object.keys(@src.tempDevices).length*10
-    c.write lHeader.padRight(" ", @width - lHeader.length - rHeaderLength)
+    c.write lHeader + " ".repeat(@width - lHeader.length - rHeaderLength)
     c.write(rHeader)
     c.reset().bg.reset()
 
@@ -254,8 +254,9 @@ class Tegh
     stdout.write(prefix + s + "\n")
 
   _renderProgressBar: (data = {uploaded: 0, total: 1}) =>
+    # console.log data
     p = (data.uploaded / data.total * 100).round()
-    bar = "#{''.pad "#", (p*2/10).round()}#{''.pad '.', (20-p*2/10).round()}"
+    bar = "#{"#".repeat (p*2/10).round()}#{".".repeat (20-p*2/10).round()}"
     percent = "#{if p > 10 then "" else " "}#{p.round(1)}"
     c = @cli.cursor
     c.hide().goto(0, @cli.height+1).write "uploading [#{bar}] #{percent}%"
