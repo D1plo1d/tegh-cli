@@ -369,6 +369,7 @@ class Tegh
     absPath = path.normalize path.get (words[1..]||[""]).join(" ")
 
     # console.log absPath
+    absPath = absPath.remove(/^[A-Za-z]\:\/+/)
     out = glob(absPath + "*", sync: true).filter (p) =>
       p.endsWith(@_fileTypes) or fs.lstatSync(p).isDirectory()
 
@@ -383,6 +384,7 @@ class Tegh
       absPath = out[0]
       out[0] = ""
 
+    absPath = absPath.replace(/^[A-Za-z]\:\/+/, "\\")
     isDirectory = fs.existsSync(absPath) and fs.lstatSync(absPath).isDirectory()
     absPath += path.sep if !absPath.endsWith(/\/|\\/) and isDirectory
     @cli.rl.line = line = "add_job #{path.normalize absPath}"

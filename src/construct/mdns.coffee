@@ -4,6 +4,7 @@ UDPSocket = require('native-dns/lib/utils').UDPSocket
 DnsPacket = require('native-dns/lib/packet')
 consts = require('native-dns/lib/consts')
 util = require('util')
+net = require('net')
 EventEmitter = require('events').EventEmitter
 
 `var random_integer = function() {
@@ -14,7 +15,7 @@ EventEmitter = require('events').EventEmitter
 module.exports = class DnsSdDiscoverer extends EventEmitter
   multicastAddresses:
     udp4: "224.0.0.251"
-    udp6: "FF02::FB"
+    # udp6: "FF02::FB"
   mdnsServer: 
     port: 5353
     type: "udp"
@@ -70,6 +71,8 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     # console.log "Closing the MDNS discovery udp connections"
 
   _onMessage: (buffer, rinfo) =>
+    console.log rinfo.address
+    return if net.isIPv6 rinfo.address
     packet = DnsPacket.parse(buffer)
     event = {address: rinfo.address, hostname: null}
     # console.log event
