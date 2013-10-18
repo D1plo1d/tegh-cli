@@ -29,6 +29,5 @@ module.exports = class ConstructDiscoverer extends EventEmitter
   _rmServer: (rm) =>
     console.log @mdns
     for service, i in @list
-      console.log rm
-      services.remove(service) if service.fullname == rm.fullname
+      @list.remove(service) if service.fullname == rm.fullname
     @emit "serviceDown", service

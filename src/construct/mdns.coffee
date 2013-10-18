@@ -25,12 +25,13 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     type: "PTR"
 
   constructor: (@filter) ->
+    @services = []
 
   start: ->
     @start = Date.now()
 
     @makeAllMdnsRequests()
-    @mdnsInterval = setInterval(@makeAllMdnsRequests, 100)
+    @mdnsInterval = setInterval(@makeAllMdnsRequests, 50)
 
   makeAllMdnsRequests: =>
     @_sockets = []
@@ -71,7 +72,6 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     # console.log "Closing the MDNS discovery udp connections"
 
   _onMessage: (buffer, rinfo) =>
-    console.log rinfo.address
     return if net.isIPv6 rinfo.address
     packet = DnsPacket.parse(buffer)
     event = {address: rinfo.address, hostname: null}
@@ -86,8 +86,23 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
       event.serviceName = serviceName = service.data.split(".")[0]
       event.path = "/printers/#{serviceName}/"
     # console.log event
+    filter = (e2) ->
+      e2.serviceName == event.serviceName and e2.address == event.address
+    service = @services.find filter
+    return @_updateTimeout service if service?
+    @services.push event
+    @_updateTimeout event
     @emit "serviceUp", event
-    clearInterval @mdnsInterval
+    # clearInterval @mdnsInterval
+
+  _removeService: (service) =>
+    console.log service
+    @services.remove service
+    @emit "serviceDown", service
+
+  _updateTimeout: (service) ->
+    clearTimeout service.staleTimeout if service.staleTimeout?
+    service.staleTimeout = setTimeout(@_removeService.fill(service), 500)
 
 
 new DnsSdDiscoverer()
