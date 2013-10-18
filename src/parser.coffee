@@ -28,7 +28,7 @@ parseSetArguments = (args) ->
   return data
 
 toJSON = (msg) ->
-  words = msg.words()
+  words = msg.replace(":", ": ").words()
   args = words[1..].compact().map preprocessArgument
 
   # Figure out if the arguments are a hash
