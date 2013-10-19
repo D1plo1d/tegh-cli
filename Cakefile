@@ -1,10 +1,14 @@
 path = require('path')
 sys = require('sys')
 spawn = require('./build/util.coffee').spawn
+exec = require('child_process').exec
 execSync = require('./build/util.coffee').execSync
 glob = require('glob')
 fs = require('fs-extra')
 require("sugar")
+
+VERSION = "0.3.0"
+
 
 packageHelp = "Package Tegh for ubuntu, fedora, brew (osx) and arch"
 distroHelp = 'Package only the specific distro [arch|fedora|ubuntu]'
@@ -24,7 +28,6 @@ task "package", packageHelp, (opts) ->
 
   # OSX
   if distros.indexOf('osx') != -1
-    VERSION = "0.2.0"
     brew_tar_path = path.resolve(packageDir, "tegh-#{VERSION}-brew.tar.gz")
     console.log brew_tar_path
     cmd = "tar -cvzf '#{brew_tar_path}'"
@@ -50,12 +53,12 @@ task "package", packageHelp, (opts) ->
 
   # Ubuntu
   if distros.indexOf('ubuntu') != -1
-    spawn path.resolve(buildDir, "ubuntu.sh"), cwd: buildDir
-    debFile = glob.sync(path.resolve buildDir, "tegh-*.deb")[0]
-    fs.copy debFile, path.resolve(packageDir, path.basename debFile)
+    spawn path.resolve(buildDir, "ubuntu.sh"), cwd: buildDir, ->
+      debFile = glob.sync(path.resolve buildDir, "tegh-*.deb")[0]
+      fs.rename debFile, path.resolve(packageDir, path.basename debFile)
 
   # Arch
   if distros.indexOf('arch') != -1
     spawn "tar",
-      args: ['-cvzf', path.resolve(packageDir, 'tegh.tar.gz'), 'tegh']
+      args: ['-cvzf', path.resolve(packageDir, "tegh-#{VERSION}-arch.tar.gz"), 'tegh']
       cwd: path.resolve(buildDir, 'arch-src')

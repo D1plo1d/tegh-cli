@@ -5,7 +5,7 @@
 set -u
 set -e
 
-TEGH_VERSION=0.2.0
+TEGH_VERSION=0.3.0
 
 SRC=/tmp/tegh-deb-src
 DIST=/tmp/tegh-deb-dist

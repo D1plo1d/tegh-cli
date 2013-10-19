@@ -74,7 +74,6 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
   _onMessage: (buffer, rinfo) =>
     return if net.isIPv6 rinfo.address
     packet = DnsPacket.parse(buffer)
-    event = {address: rinfo.address, hostname: null}
     # console.log event
 
     for service in packet.answer
@@ -82,18 +81,22 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
       # event.address = service.address if service.type == 28
       continue unless service.class == 1 and service.type == 12
       continue unless service.data?
-      # console.log service
-      event.serviceName = serviceName = service.data.split(".")[0]
-      event.path = "/printers/#{serviceName}/"
+      @_updateService
+        address: rinfo.address
+        hostname: null
+        serviceName: serviceName = service.data.split(".")[0]
+        path: "/printers/#{serviceName}/"
+
+  _updateService: (service) =>
     # console.log event
-    filter = (e2) ->
-      e2.serviceName == event.serviceName and e2.address == event.address
-    service = @services.find filter
-    return @_updateTimeout service if service?
-    @services.push event
-    @_updateTimeout event
-    @emit "serviceUp", event
-    # clearInterval @mdnsInterval
+    preExistingService = @services.find @_isSameService.fill(service)
+    return @_updateTimeout preExistingService if preExistingService?
+    @services.push service
+    @_updateTimeout service
+    @emit "serviceUp", service
+
+  _isSameService: (e1, e2) ->
+    e2.serviceName == e1.serviceName and e2.address == e1.address
 
   _removeService: (service) =>
     console.log service

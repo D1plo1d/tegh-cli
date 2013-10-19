@@ -35,8 +35,7 @@ module.exports = class FedoraBuild
     throw "Fedora package not built" unless @package?
     basename = path.basename @package
     binPath = path.resolve(__dirname, '..', 'bin', 'packages', basename)
-    fs.copy @package, binPath
-    @callback?()
+    fs.rename @package, binPath, @callback
 
 
 # new FedoraBuild().run()

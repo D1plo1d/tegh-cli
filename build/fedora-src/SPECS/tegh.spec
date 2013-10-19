@@ -1,5 +1,5 @@
 Name:      tegh
-Version:   0.2.0
+Version:   0.3.0
 Release:   1%{?dist}
 Summary:   Tea Earl Grey Hot. A 3D Printer Client.
 License:   MIT
