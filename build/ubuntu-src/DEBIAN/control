@@ -4,7 +4,6 @@ Section: base
 Priority: optional
 Architecture: all
 Installed-Size: <%=SIZE%>
-Depends: nodejs (>=0.10.5)
+Depends: nodejs (>=0.10.5), git
 Maintainer: Rob Gilson <d1plo1d@d1plo1d.com>
-Description: A client for controlling Construct Protocol 3d printers over local
- networks.
+Description: A client for controlling Construct Protocol 3d printers over local networks.
