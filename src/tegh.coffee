@@ -186,9 +186,11 @@ class Tegh
 
     cols = 12
     w = Math.round((@cli.width - cols) / cols)
+    colWidths = [        5,     25,        11,        7]
+    colWidths.unshift @cli.width - 6 - colWidths.sum()
     table = new Table
-      head: ['Job', 'Qty', 'Status', 'Id']
-      colWidths: [(@cli.width - w*cols) + w*7 - 5, w, w*2, w*2]
+      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id']
+      colWidths: colWidths
       style: { 'padding-left': 1, 'padding-right': 1 }
 
     i = 0
@@ -207,7 +209,14 @@ class Tegh
       id = "N/A"
     else
       id = job.id.pad(5)
-    table.push [prefix, job.qty, job.status?.capitalize?() || "Queued", id]
+    if job.file_name.endsWith(/\.ngc|\.gcode/)
+      profile = "N/A"
+    else
+      profile = "#{job.slicing_engine||@printer.slicing_engine} / "
+      profile += "#{job.slicing_profile||@printer.slicing_profile}"
+      profile = profile.titleize()
+    status = job.status?.capitalize?() || "Queued"
+    table.push [prefix, job.qty, profile, status, id]
     # line = line.green if job.status == 'printing'
 
   _lHeader: ->
