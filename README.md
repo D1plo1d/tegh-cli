@@ -2,7 +2,7 @@
 
 A simple command line interface for controlling 3D printers via the Construct Protocol.
 
-**Note:** To control your 3D printer with Tegh please install the [construct-daemon](https://github.com/D1plo1d/construct-daemon) on the computer attached to the 3D printer.
+**Note:** Please first install the [construct-daemon](https://github.com/D1plo1d/construct-daemon) on the computer attached to the 3D printer. Tegh needs that!
 
 
 ## Features
