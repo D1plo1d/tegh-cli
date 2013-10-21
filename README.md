@@ -1,9 +1,16 @@
 # Tegh
 
-A simple command line interface for connecting to 3D printers via the Construct Protocol.
-
+A simple command line interface for controlling 3D printers via the Construct Protocol.
 
 Note: Tegh requires a Construct Server to connect to and print with. In other words, you're going to need [construct-daemon](https://github.com/D1plo1d/construct-daemon) installed on your printer.
+
+
+## Features
+
+* **WiFi 3D Printer Control** - No need to tether your laptop to the 3D printer for hours anymore. Print from anywhere in the house.
+* **Network Discoverablity** - All 3D printers with construct-daemon on the network will show up automatically.
+* **Queue your Print Jobs** - Add as many print jobs as you want. It's easy to manage your prints whether printing is fully or semi-autonomously. Try it out with the Makerbot ABP for extra-awesome automation!
+* **Automatic Slicing** - Slicing is done by CuraEngine automatically. Just configure your printers' profiles in the `~/.construct/cura_engine` directory and it will automatically slice any 3D models added to the queue.
 
 
 ## Installation
@@ -30,17 +37,9 @@ Note: Tegh requires a Construct Server to connect to and print with. In other wo
 
 ## Useage
 
-### Windows
+**Everything Except Windows**: `tegh`
 
-Open program files / open all programs / open the Tegh folder / run Tegh
-
-### Linux / OSX
-
-To launch tegh from the command line type:
-
-`tegh`
-
-That's it. No need to configure anything at all. Tegh will automatically detect all the compatible printers on the network and let you choose one to connect to.
+**Windows**: Open program files / open all programs / open the Tegh folder / run Tegh
 
 
 ## Development
