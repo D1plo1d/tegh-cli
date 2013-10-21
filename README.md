@@ -41,6 +41,10 @@ Note: Tegh requires a Construct Server to connect to and print with. In other wo
 
 **Windows**: Open program files / open all programs / open the Tegh folder / run Tegh
 
+### Commands
+
+Type `help` into tegh once a printer is connected to for more tegh useage information.
+
 
 ## Development
 
