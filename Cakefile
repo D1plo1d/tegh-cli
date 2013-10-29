@@ -62,3 +62,6 @@ task "package", packageHelp, (opts) ->
     spawn "tar",
       args: ['-cvzf', path.resolve(packageDir, "tegh-#{VERSION}-arch.tar.gz"), 'tegh']
       cwd: path.resolve(buildDir, 'arch-src')
+    spawn "tar",
+      args: ['-cvzf', path.resolve(packageDir, 'tegh-git.tar.gz'), 'tegh-git']
+      cwd: path.resolve(buildDir, 'arch-src')
