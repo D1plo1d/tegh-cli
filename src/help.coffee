@@ -84,7 +84,7 @@ module.exports =
     """
     required_args: ["job_id"]
     examples:
-      "delete job #5": "rm_job 5"
+      "delete job #5": "rm_job id: 5"
   change_job:
     description: """
       Change a print job's position in the printer's queue.
