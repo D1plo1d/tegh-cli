@@ -378,9 +378,6 @@ class Tegh
     if out.length < 2
       out[0] = ""
     @cli.rl.line = line = "add_job #{absPath}"
-    console.log line
-    console.log line
-    console.log line
     @cli.rl.cursor = line.length
 
     return [out, line]
