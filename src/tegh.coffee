@@ -221,18 +221,21 @@ class Tegh
     else
       start = "N/A"
     if job.elapsed_time?
-      secs = job.elapsed_time / 1000
-      ms = Math.floor(job.elapsed_time % 1000)
-      minutes = secs / 60
-      secs = Math.floor(secs % 60)
-      hours = minutes / 60
-      minutes = Math.floor(minutes % 60)
-      hours = Math.floor(hours % 24)
-      elapsed = hours.pad(2) + ":" + minutes.pad(2) + ":" + secs.pad(2)
+      elapsed = @_formatTime(job.elapsed_time)
     else
       elapsed="N/A"
     table.push [prefix, job.qty, profile, status, id, start, elapsed]
     # line = line.green if job.status == 'printing'
+
+  _formatTime: (millis) ->
+    secs = millis / 1000
+    ms = Math.floor(millis % 1000)
+    minutes = secs / 60
+    secs = Math.floor(secs % 60)
+    hours = minutes / 60
+    minutes = Math.floor(minutes % 60)
+    hours = Math.floor(hours % 24)
+    return hours.pad(2) + ":" + minutes.pad(2) + ":" + secs.pad(2)
 
   _lHeader: ->
     fields = []
@@ -272,7 +275,9 @@ class Tegh
       continue unless job.status == "printing"
       total += job.total_lines || 0
       current += job.current_line || 0
-    return status + "( #{((100*current / total) || 0).format(2)}% ) "
+    status += "( #{((100*current / total) || 0).format(2)}% ) "
+    time = ((new Date().getTime()) - job.start_time)
+    return status + " Elapsed: " + @_formatTime(time)
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
