@@ -83,6 +83,5 @@ module.exports = class ServiceSelector extends EventEmitter
     stdin.removeListener 'data', @onKeyData
     stdin.setRawMode(false)
     stdin.resume()
-    for k in ["Up", "Down"]
-      @services.removeListener("service#{k}", @render)
+    @services.stop()
 

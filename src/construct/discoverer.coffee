@@ -9,25 +9,12 @@ module.exports = class ConstructDiscoverer extends EventEmitter
     for phy, address_list of os.networkInterfaces()
       @local_ips.push(a.address) for a in address_list
 
-    @list = []
-    # Watch all construct servers on the network
-    # @mdns = mdns.createBrowser( st.protocolHelper('_tcp')('_construct') )
-    # @mdns
-    #   .on('serviceUp', @_addServer)
-    #   .on('serviceDown', @_rmServer)
-    #   .start()
     @mdns = new mdns('_construct._tcp.local')
-      .on('serviceUp', @_addServer)
-      .on('serviceDown', @_rmServer)
+      .on('serviceUp',   (service) => @emit "serviceUp", service)
+      .on('serviceDown', (service) => @emit "serviceDown", service)
       .start()
 
-  _addServer: (service) =>
-    # service.name ?= "localhost" if @local_ips.indexOf(service.address) != 0
-    @list.push service
-    @emit "serviceUp", service
-
-  _rmServer: (rm) =>
-    console.log @mdns
-    for service, i in @list
-      @list.remove(service) if service.fullname == rm.fullname
-    @emit "serviceDown", service
+    @__defineGetter__ 'list', => @mdns.services
+  stop: =>
+    @mdns.stop()
+    @removeAllListeners()

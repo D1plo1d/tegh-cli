@@ -32,12 +32,13 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
     @makeAllMdnsRequests()
     @mdnsInterval = setInterval(@makeAllMdnsRequests, 50)
+    return @
 
   makeAllMdnsRequests: =>
     @_sockets = []
     for type, address of @multicastAddresses
       @_makeMdnsRequest type, address
-    setTimeout(@close.fill(@_sockets), 2000)
+    setTimeout(@_close.fill(@_sockets), 2000)
 
   _makeMdnsRequest: (type, address) =>
     server = 
@@ -65,11 +66,15 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     dg.ref()
     @_sockets.push dg
 
-  close: (sockets) =>
+  _close: (sockets) =>
     for socket in sockets
       socket.unref()
       socket.close()
     # console.log "Closing the MDNS discovery udp connections"
+
+  stop: =>
+    clearInterval @mdnsInterval
+    @removeAllListeners
 
   _onMessage: (buffer, rinfo) =>
     return if net.isIPv6 rinfo.address
@@ -100,12 +105,12 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
 
   _removeService: (service) =>
     console.log service
-    @services.remove service
+    @services = @services.exclude @_isSameService.fill(service)
     @emit "serviceDown", service
 
   _updateTimeout: (service) ->
     clearTimeout service.staleTimeout if service.staleTimeout?
-    service.staleTimeout = setTimeout(@_removeService.fill(service), 500)
+    service.staleTimeout = setTimeout(@_removeService.fill(service), 1000)
 
 
 new DnsSdDiscoverer()
