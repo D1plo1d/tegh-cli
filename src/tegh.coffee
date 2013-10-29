@@ -365,13 +365,13 @@ class Tegh
     out[0] = out[0] + " " if out.length == 1
     out
 
-  _fileTypes: /\.(gcode|ngc|stl|amf|obj)/
+  _fileTypes: /\.(gcode|ngc|stl|amf|obj)/i
 
 
   _autocomplete_dir: (out, words, line) =>
     dir = words[1..].join(' ')
     dir = "./" if dir.length == 0
-    [absPath, out] = dirAutocomplete dir
+    [absPath, out] = dirAutocomplete dir, @_fileTypes
 
     # If there is only 1 result set the current REPL line to it's 
     # value.

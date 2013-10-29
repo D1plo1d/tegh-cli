@@ -15,7 +15,7 @@ homeDir = ( ->
 
 homeDir = homeDir.replace '\\', '/' if os.platform().startsWith 'win'
 
-dirAutocomplete = (dir) ->
+dirAutocomplete = (dir, fileTypes) ->
   # Resolving paths that start with tilds (~)
   if path.isHome dir
     dir = path.normalize path.get dir
@@ -24,7 +24,7 @@ dirAutocomplete = (dir) ->
   # Creating a glob to find files that start with the path
   # the user is building.
   out = glob(dir + "*", sync: true).filter (p) =>
-    p.endsWith(@_fileTypes) or fs.lstatSync(p).isDirectory()
+    p.endsWith(fileTypes) or fs.lstatSync(p).isDirectory()
 
   # Attempting to find a common prefix in all the matched paths and 
   # autocomplete that prefix.
@@ -37,9 +37,9 @@ dirAutocomplete = (dir) ->
 
   return [dir, out]
 
-module.exports = (dir) ->
+module.exports = (dir, fileTypes) ->
   try
-    dirAutocomplete dir
+    dirAutocomplete dir, fileTypes
   catch e # Permissions Error
     # console.log e
     [dir, []]
