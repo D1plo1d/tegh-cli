@@ -24,7 +24,7 @@ dirAutocomplete = (dir, fileTypes) ->
   # Creating a glob to find files that start with the path
   # the user is building.
   out = glob(dir + "*", sync: true).filter (p) =>
-    p.endsWith(fileTypes) or fs.lstatSync(p).isDirectory()
+    p.endsWith(fileTypes, undefined, false) or fs.lstatSync(p).isDirectory()
 
   # Attempting to find a common prefix in all the matched paths and 
   # autocomplete that prefix.
