@@ -31,7 +31,7 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     @start = Date.now()
 
     @makeAllMdnsRequests()
-    @mdnsInterval = setInterval(@makeAllMdnsRequests, 50)
+    @mdnsInterval = setInterval(@makeAllMdnsRequests, 25)
     return @
 
   makeAllMdnsRequests: =>
@@ -104,7 +104,7 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     e2.serviceName == e1.serviceName and e2.address == e1.address
 
   _removeService: (service) =>
-    console.log service
+    # console.log service
     @services = @services.exclude @_isSameService.fill(service)
     @emit "serviceDown", service
 

@@ -15,6 +15,7 @@ module.exports = class ConstructDiscoverer extends EventEmitter
       .start()
 
     @__defineGetter__ 'list', => @mdns.services
+
   stop: =>
     @mdns.stop()
     @removeAllListeners()
