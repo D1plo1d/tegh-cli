@@ -14,16 +14,13 @@ Table = require 'cli-table'
 stdout = process.stdout
 stdin = process.stdin
 
+dirAutocomplete = require './dir_autocomplete'
+
 clear = -> `util.print("\u001b[2J\u001b[0;0f")`
 
 getUserHome = ->
   drive = process.env.HOMEDRIVE || ""
   drive + (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE)
-
-longestPrefix = (a, b) ->
-  longest = null
-  longest ?= a[0..-i] for i in [1..a.length] when b.startsWith(a[0..-i])
-  return longest
 
 class CliConsole
   historyPath: "#{getUserHome()}/.construct_history"
@@ -370,34 +367,22 @@ class Tegh
 
   _fileTypes: /\.(gcode|ngc|stl|amf|obj)/
 
+
   _autocomplete_dir: (out, words, line) =>
-    # Creating a glob to find files that start with the path
-    # the user is building.
-    words[1] = "~" if words[1] == "~/"
-    relative = (words[1]||"").indexOf("~") == 0
-    absPath = path.normalize path.get (words[1..]||[""]).join(" ")
-
-    # console.log absPath
-    absPath = absPath.remove(/^[A-Za-z]\:\/+/)
-    out = glob(absPath + "*", sync: true).filter (p) =>
-      p.endsWith(@_fileTypes) or fs.lstatSync(p).isDirectory()
-
-    # Attempting to find a common prefix in all the matched paths and 
-    # autocomplete that prefix.
-    shortest = out.reduce longestPrefix, out[0]
-    absPath = shortest if shortest? and shortest.length > absPath.length
+    dir = words[1..].join(' ')
+    dir = "./" if dir.length == 0
+    [absPath, out] = dirAutocomplete dir
 
     # If there is only 1 result set the current REPL line to it's 
     # value.
-    if out.length == 1
-      absPath = out[0]
+    if out.length < 2
       out[0] = ""
-
-    absPath = absPath.replace(/^[A-Za-z]\:\/+/, "\\")
-    isDirectory = fs.existsSync(absPath) and fs.lstatSync(absPath).isDirectory()
-    absPath += path.sep if !absPath.endsWith(/\/|\\/) and isDirectory
-    @cli.rl.line = line = "add_job #{path.normalize absPath}"
+    @cli.rl.line = line = "add_job #{absPath}"
+    console.log line
+    console.log line
+    console.log line
     @cli.rl.cursor = line.length
+
     return [out, line]
 
 
