@@ -17,22 +17,22 @@ A simple command line interface for controlling 3D printers via the Construct Pr
 
 **Windows**: [Tegh Windows Installer][1]
 
-[1]:https://s3.amazonaws.com/tegh_binaries/0.3.0/tegh-0.3.0-setup.exe
+[1]:https://s3.amazonaws.com/tegh_binaries/0.3.1/tegh-0.3.1-setup.exe
 
 **OSX**: `brew tap D1plo1d/tegh; brew install tegh`
 
 **Arch**: `yaourt -S tegh`
 
-**Fedora**: [tegh-0.3.0-1.noarch.rpm][2314]
+**Fedora**: [tegh-0.3.1-1.noarch.rpm][2314]
 
-[2314]:https://s3.amazonaws.com/tegh_binaries/0.3.0/tegh-0.3.0-1.noarch.rpm
+[2314]:https://s3.amazonaws.com/tegh_binaries/0.3.1/tegh-0.3.1-1.noarch.rpm
 
 **Ubuntu:**
 
 1. [Install NodeJS from ppa:chris-lea/node.js][2]
 [2]: https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager#ubuntu-mint
-2. Install [tegh-0.3.0.deb][3]
-[3]: https://s3.amazonaws.com/tegh_binaries/0.3.0/tegh-0.3.0.deb
+2. Install [tegh-0.3.1.deb][3]
+[3]: https://s3.amazonaws.com/tegh_binaries/0.3.1/tegh-0.3.1.deb
 
 
 ## Useage
