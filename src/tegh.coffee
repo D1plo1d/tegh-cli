@@ -420,7 +420,7 @@ class Tegh
       nextopts=[]
       for arg, subargs of current_args_tree
         nextopts.push arg
-    out.push nextopts.join(" ") + " "
+    out.push nextopts.join(" ")
     out.push ""
     out
 

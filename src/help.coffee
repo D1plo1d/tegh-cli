@@ -12,6 +12,11 @@ module.exports =
       home the printer's axes. Specifing individual axes will only home those 
       axes.
     """
+    arg_tree: {
+      x: null,
+      y: null,
+      z: null
+      }
     optional_args: ["x", "y", "z"]
     examples:
       "home all axes": "home"
@@ -25,6 +30,11 @@ module.exports =
     #   move the printer either a fixed distance (default) or 
     #   until stopped (via ++ or -- values, if available).
     # """
+    arg_tree: {
+      x: {value:null},
+      y: {value:null},
+      z: {value:null},
+      e: {value:null}      }
     optional_args: ["x", "y", "z", "e"]
     # optional_args: ["continuous", "x", "y", "z", "e"]
     examples:
@@ -47,7 +57,16 @@ module.exports =
       - motors: enable/disable the printer's motors
       - fan: enable/disable the printer's fan
     """
-    arg_tree: { temp: {e: {value: null}, b: {value: null}}, fan: {enabled: {on: null, off: null} }  }
+    arg_tree: {
+      temp:{
+        e: {value: null}, 
+        b: {value: null}
+        },
+      fan: {
+        enabled: 
+          {on: null, off: null}
+        }
+      }
     optional_args: ["e", "b", "fan", "motors"]
     # optional_args: ["e", "b"]# Proposed Additions: ["e", "e0", "e1", "e2", "b"]
     examples:
@@ -95,7 +114,14 @@ module.exports =
     # description: """
     #   Change a print job's quantity or position in the queue.
     # """
-    # arg_tree: {id:  { job_id: {position : {value : null }, {qty : {value: null}} } } }
+    arg_tree: {
+      "id:":  { 
+        job_id: {
+          position : {value : null },
+          qty : {value: null}
+          } 
+        } 
+      }
     required_args: ["id:"]
     optional_args: ["position"] # ["qty", "position"]
     examples:
