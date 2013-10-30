@@ -41,9 +41,7 @@ A simple command line interface for controlling 3D printers via the Construct Pr
 
 **Windows**: Open program files / open all programs / open the Tegh folder / run Tegh
 
-### Commands
-
-Type `help` into tegh once a printer is connected to for more tegh useage information.
+Type `help` into tegh once a printer is connected to for more info.
 
 
 ## Development
