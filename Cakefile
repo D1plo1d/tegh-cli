@@ -7,14 +7,34 @@ glob = require('glob')
 fs = require('fs-extra')
 require("sugar")
 
-VERSION = "0.3.0"
-
+VERSION = "0.3.1"
 
 packageHelp = "Package Tegh for ubuntu, fedora, brew (osx) and arch"
 distroHelp = 'Package only the specific distro [arch|fedora|ubuntu]'
 option '-d', '--distro [DISTRIBUTION]', distroHelp
 
+update = (f, opts) ->
+  f = "./build/#{f}"
+  opts.with ?= VERSION
+  content = fs.readFileSync f, encoding: "utf8"
+  content = content.replace opts.replace, "$1#{opts.with}"
+  fs.writeFileSync f, content
+  # Debug output
+  msg = "Updating #{f}.."
+  console.log "#{msg.padRight(' ', 50 - msg.length)} [ DONE ]"
+
+
+
+updateAllPackageVersion = () ->
+  update 'arch-src/tegh/PKGBUILD', replace: /(pkgver=)([^\n]*)/
+  update 'arch-src/tegh/PKGBUILD', replace: /(pkgrel=)([^\n]*)/, with: 1
+  update 'fedora-src/SPECS/tegh.spec', replace: /(Version:\s*)([^\n]*)/
+  update 'ubuntu.sh', replace: /(TEGH_VERSION=)([^\n]*)/
+  update 'windows.iss', replace: /(AppVersion=)([^\n\r]*)/
+
 task "package", packageHelp, (opts) ->
+  updateAllPackageVersion()
+
   console.log opts.distro
   if opts.distro
     distros = [opts.distro]
