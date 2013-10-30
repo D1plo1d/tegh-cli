@@ -371,6 +371,9 @@ class Tegh
     # Command Autocompletion
     if words.length == 1
       out = @_autocomplete_cmd(line)
+    # Command arg autocomplete
+    if words.length > 1
+      out = @_autocomplete_args (line)
     # Help Autocomplete
     if words[0] == "help"
       out = @_autocomplete_cmd words[1..].join(" "), "help "
@@ -387,6 +390,58 @@ class Tegh
       out.push "#{prefix}#{cmd}" if cmd.startsWith(line)
     out[0] = out[0] + " " if out.length == 1
     out
+
+  _autocomplete_args: (line) ->
+    out = []
+    words_tmp=line.replace("/\s+/g","").split(" ")
+    words=[] # Ugly hack to remove intermediate spaces:
+    for word in words_tmp
+      words.push word if word
+
+    # Find arg_tree from  command
+    current_args_tree = {}
+    for cmd,data of @commands
+      if cmd == words[0] && data.arg_tree?
+        # Recurse through existing word list to find base tree:
+        current_args_tree = @_autocomplete_recurse_to(line,data.arg_tree)
+        break
+
+    if current_args_tree != {}
+
+      # Resolve partial
+      for arg, subargs of current_args_tree
+        if arg.startsWith words[words.length-1]
+          newline = words[0..words.length-2]
+          newline.push arg+" "
+          out.push newline.join(" ")
+          return out
+
+      # Print next options:
+      nextopts=[]
+      for arg, subargs of current_args_tree
+        nextopts.push arg
+    out.push nextopts.join(" ") + " "
+    out.push ""
+    out
+
+
+  # Returns the current level of argument tree of last word in array:
+  _autocomplete_recurse_to: (line,argtree,idx=1) ->
+    words = line.replace(/^\s+|\s+$/g, "").split(" ")
+    # Null case: Cannot find location.
+    if words.length < idx
+      return {}
+    if words.length == idx
+      return argtree
+    # Full match - recurse:
+    for arg,subargs of argtree
+      if words[idx] == arg
+        return @_autocomplete_recurse_to(line,subargs,idx+1)
+    # Partial match: Return base tree
+    for arg,subargs of argtree
+        return argtree if arg.startsWith words[idx]
+    return {}
+
 
   _fileTypes: /\.(gcode|ngc|stl|amf|obj)/
 
