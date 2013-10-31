@@ -183,10 +183,10 @@ class Tegh
 
     cols = 12
     w = Math.round((@cli.width - cols) / cols)
-    colWidths = [        5,     25,        11,        7]
-    colWidths.unshift @cli.width - 6 - colWidths.sum()
+    colWidths = [        5,     25,        11,        7,   20, 15  ]
+    colWidths.unshift @cli.width - 8 - colWidths.sum()
     table = new Table
-      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id']
+      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id', 'Start', 'Total']
       colWidths: colWidths
       style: { 'padding-left': 1, 'padding-right': 1 }
 
@@ -213,8 +213,26 @@ class Tegh
       profile += "#{job.slicing_profile||@printer.slicing_profile}"
       profile = profile.titleize()
     status = job.status?.capitalize?() || "Queued"
-    table.push [prefix, job.qty, profile, status, id]
+    if job.start_time?
+      start = (new Date(job.start_time)).format('{12hr}:{mm}:{ss} {tt}')
+    else
+      start = "N/A"
+    if job.elapsed_time?
+      elapsed = @_formatTime(job.elapsed_time)
+    else
+      elapsed="N/A"
+    table.push [prefix, job.qty, profile, status, id, start, elapsed]
     # line = line.green if job.status == 'printing'
+
+  _formatTime: (millis) ->
+    secs = millis / 1000
+    ms = Math.floor(millis % 1000)
+    minutes = secs / 60
+    secs = Math.floor(secs % 60)
+    hours = minutes / 60
+    minutes = Math.floor(minutes % 60)
+    hours = Math.floor(hours % 24)
+    return hours.pad(2) + ":" + minutes.pad(2) + ":" + secs.pad(2)
 
   _lHeader: ->
     fields = []
@@ -254,7 +272,9 @@ class Tegh
       continue unless job.status == "printing"
       total += job.total_lines || 0
       current += job.current_line || 0
-    return status + "( #{((100*current / total) || 0).format(2)}% ) "
+    status += "( #{((100*current / total) || 0).format(2)}% ) "
+    time = ((new Date().getTime()) - job.start_time)
+    return status + " Elapsed: " + @_formatTime(time)
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
