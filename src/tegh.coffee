@@ -186,7 +186,7 @@ class Tegh
 
     cols = 12
     w = Math.round((@cli.width - cols) / cols)
-    colWidths = [        5,     25,        11,        7,   20, 15  ]
+    colWidths = [        5,     25,                11,       7,    20,      15    ]
     colWidths.unshift @cli.width - 8 - colWidths.sum()
     table = new Table
       head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id', 'Start', 'Total']
@@ -223,7 +223,7 @@ class Tegh
     if job.elapsed_time?
       elapsed = @_formatTime(job.elapsed_time)
     else
-      elapsed="N/A"
+      elapsed = "N/A"
     table.push [prefix, job.qty, profile, status, id, start, elapsed]
     # line = line.green if job.status == 'printing'
 
