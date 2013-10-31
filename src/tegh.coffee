@@ -186,7 +186,7 @@ class Tegh
 
     cols = 12
     w = Math.round((@cli.width - cols) / cols)
-    colWidths = [        5,     25,                11,       7,    20,      15    ]
+    colWidths = [        5,     25,                11,       7,    10,      10    ]
     colWidths.unshift @cli.width - 8 - colWidths.sum()
     table = new Table
       head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id', 'Start', 'Total']
@@ -217,7 +217,7 @@ class Tegh
       profile = profile.titleize()
     status = job.status?.capitalize?() || "Queued"
     if job.start_time?
-      start = (new Date(job.start_time)).format('{12hr}:{mm}:{ss} {tt}')
+      start = (new Date(job.start_time)).format('{12hr}:{mm} {TT}')
     else
       start = "N/A"
     if job.elapsed_time?
