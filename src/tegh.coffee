@@ -183,10 +183,10 @@ class Tegh
 
     cols = 12
     w = Math.round((@cli.width - cols) / cols)
-    colWidths = [        5,     25,        11,        7]
-    colWidths.unshift @cli.width - 6 - colWidths.sum()
+    colWidths = [        5,     25,                11,       7,    10,      10    ]
+    colWidths.unshift @cli.width - 8 - colWidths.sum()
     table = new Table
-      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id']
+      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id', 'Start', 'Total']
       colWidths: colWidths
       style: { 'padding-left': 1, 'padding-right': 1 }
 
@@ -213,8 +213,26 @@ class Tegh
       profile += "#{job.slicing_profile||@printer.slicing_profile}"
       profile = profile.titleize()
     status = job.status?.capitalize?() || "Queued"
-    table.push [prefix, job.qty, profile, status, id]
+    if job.start_time?
+      start = (new Date(job.start_time)).format('{12hr}:{mm} {TT}')
+    else
+      start = "N/A"
+    if job.elapsed_time?
+      elapsed = @_formatTime(job.elapsed_time)
+    else
+      elapsed = "N/A"
+    table.push [prefix, job.qty, profile, status, id, start, elapsed]
     # line = line.green if job.status == 'printing'
+
+  _formatTime: (millis) ->
+    secs = millis / 1000
+    ms = Math.floor(millis % 1000)
+    minutes = secs / 60
+    secs = Math.floor(secs % 60)
+    hours = minutes / 60
+    minutes = Math.floor(minutes % 60)
+    hours = Math.floor(hours % 24)
+    return hours.pad(2) + ":" + minutes.pad(2) + ":" + secs.pad(2)
 
   _lHeader: ->
     fields = []
@@ -254,7 +272,9 @@ class Tegh
       continue unless job.status == "printing"
       total += job.total_lines || 0
       current += job.current_line || 0
-    return status + "( #{((100*current / total) || 0).format(2)}% ) "
+    status += "( #{((100*current / total) || 0).format(2)}% ) "
+    time = ((new Date().getTime()) - job.start_time)
+    return status + " Elapsed: " + @_formatTime(time)
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
@@ -340,7 +360,6 @@ class Tegh
     @_append("")
     @_append(help)
 
-
   _autocomplete: (line) =>
     out = []
     words = line.split(" ")
@@ -348,6 +367,9 @@ class Tegh
     # Command Autocompletion
     if words.length == 1
       out = @_autocomplete_cmd(line)
+    # Command arg autocomplete
+    if words.length > 1
+      out = @_autocomplete_args (line)
     # Help Autocomplete
     if words[0] == "help"
       out = @_autocomplete_cmd words[1..].join(" "), "help "
@@ -365,8 +387,57 @@ class Tegh
     out[0] = out[0] + " " if out.length == 1
     out
 
-  _fileTypes: /\.(gcode|ngc|stl|amf|obj)/i
+  _autocomplete_args: (line) ->
+    out = []
+    words_tmp=line.replace("/\s+/g","").split(" ")
+    words=[] # Ugly hack to remove intermediate spaces:
+    for word in words_tmp
+      words.push word if word
 
+    # Find arg_tree from  command
+    current_args_tree = {}
+    for cmd,data of @commands
+      if cmd == words[0] && data.arg_tree?
+        # Recurse through existing word list to find base tree:
+        current_args_tree = @_autocomplete_recurse_to(line,data.arg_tree)
+        break
+
+    if current_args_tree != {}
+
+      # Resolve partial
+      for arg, subargs of current_args_tree
+        if arg.startsWith words[words.length-1]
+          newline = words[0..words.length-2]
+          newline.push arg+" "
+          out.push newline.join(" ")
+          return out
+
+      # Print next options:
+      nextopts=[]
+      for arg, subargs of current_args_tree
+        nextopts.push arg
+    out.push nextopts.join(" ")
+    out.push ""
+    out
+
+  # Returns the current level of argument tree of last word in array:
+  _autocomplete_recurse_to: (line,argtree,idx=1) ->
+    words = line.replace(/^\s+|\s+$/g, "").split(" ")
+    # Null case: Cannot find location.
+    if words.length < idx
+      return {}
+    if words.length == idx
+      return argtree
+    # Full match - recurse:
+    for arg,subargs of argtree
+      if words[idx] == arg
+        return @_autocomplete_recurse_to(line,subargs,idx+1)
+    # Partial match: Return base tree
+    for arg,subargs of argtree
+        return argtree if arg.startsWith words[idx]
+    return {}
+
+  _fileTypes: /\.(gcode|ngc|stl|amf|obj)/i
 
   _autocomplete_dir: (out, words, line) =>
     dir = words[1..].join(' ')
