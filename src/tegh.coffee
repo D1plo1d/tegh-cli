@@ -94,7 +94,7 @@ class CliConsole
     # The 10 character padding is to offset against ascii color codes in the 
     # header.
     rHeaderLength = rHeader.length - Object.keys(@src.tempDevices).length*10
-    spaces = Math.min 0, @width - lHeader.length - rHeaderLength
+    spaces = Math.max 0, @width - lHeader.length - rHeaderLength
     c.write lHeader + " ".repeat(spaces)
     c.write(rHeader)
     c.reset().bg.reset()
