@@ -2,7 +2,7 @@
 pkgname=tegh
 _gitname=tegh
 pkgver=0.3.1
-pkgrel=1
+pkgrel=2
 pkgdesc="A command line client to remotely monitor and control 3D printers running Prontserve."
 url="https://github.com/D1plo1d/tegh"
 arch=('any')
@@ -32,6 +32,6 @@ package() {
   cp -R "${srcdir}/${_gitname}/node_modules" "$pkgdir/usr/share/tegh/"
   install -Dm644 "${srcdir}/${_gitname}/package.json" "$pkgdir/usr/share/tegh/package.json"
 
-  echo -e "#!/bin/sh\n/usr/bin/env node /usr/share/tegh/src/tegh.coffee\n" > "${pkgdir}/usr/bin/tegh"
+  echo -e "#!/bin/sh\n/usr/bin/env coffee /usr/share/tegh/src/tegh.coffee\n" > "${pkgdir}/usr/bin/tegh"
   chmod 755 "${pkgdir}/usr/bin/tegh"
 }
