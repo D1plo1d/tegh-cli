@@ -16,7 +16,7 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
   multicastAddresses:
     udp4: "224.0.0.251"
     # udp6: "FF02::FB"
-  mdnsServer: 
+  mdnsServer:
     port: 5353
     type: "udp"
 
