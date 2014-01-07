@@ -86,10 +86,11 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
       # event.address = service.address if service.type == 28
       continue unless service.class == 1 and service.type == 12
       continue unless service.data?
+      serviceName = service.data.split(".")[0].replace /\s\(\d+\)/, ""
       @_updateService
         address: rinfo.address
         hostname: null
-        serviceName: serviceName = service.data.split(".")[0]
+        serviceName: serviceName
         path: "/printers/#{serviceName}/"
 
   _updateService: (service) =>
