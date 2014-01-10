@@ -4,7 +4,7 @@ require 'sugar'
 glob = require 'glob'
 ansi = require 'ansi'
 readline = require 'readline'
-ConstructClient = require './construct/client'
+TeghClient = require './tegh/client'
 ServiceSelector = require './service_selector'
 fs = require "fs-extra"
 touch = require "touch"
@@ -23,7 +23,7 @@ getUserHome = ->
   drive + (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE)
 
 class CliConsole
-  historyPath: "#{getUserHome()}/.construct_history"
+  historyPath: "#{getUserHome()}/.tegh_history"
 
   constructor: (@src) ->
     @cursor = ansi(stdout)
@@ -115,13 +115,13 @@ class Tegh
     clear()
     port = 2540
     stdout.write "Connecting to #{service.address}/#{service.serviceName}..."
-    @client = new ConstructClient(service.address, port, service.path)
+    @client = new TeghClient(service.address, port, service.path)
       .on("initialized", @_onInit)
       .on("add", @_onAdd)
       .on("rm", @_onRm)
       .on("change", @_onChange)
       .on("ack", @_onAck)
-      .on("construct_error", @_onError)
+      .on("tegh_error", @_onError)
       .on("unblocked", @_onUnblocked)
       .on("close", @_onClose)
 

@@ -9,7 +9,7 @@ module.exports = class ConstructDiscoverer extends EventEmitter
     for phy, address_list of os.networkInterfaces()
       @local_ips.push(a.address) for a in address_list
 
-    @mdns = new mdns('_construct._tcp.local')
+    @mdns = new mdns('_tegh._tcp.local')
       .on('serviceUp',   (service) => @emit "serviceUp", service)
       .on('serviceDown', (service) => @emit "serviceDown", service)
       .start()

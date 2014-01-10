@@ -8,7 +8,7 @@ parser = require '../parser'
 
 stdout = process.stdout
 
-module.exports = class ConstructClient extends EventEmitter
+module.exports = class TeghClient extends EventEmitter
   blocking: false
 
   constructor: (@host, @port, @path) ->
@@ -21,17 +21,16 @@ module.exports = class ConstructClient extends EventEmitter
     @socket.on "connect", @_onConnect
     @socket.on 'connectFailed', @_onConnectionFailed
 
-    #new WebSocketClient "ws://#{@host}:8000/#{@port}", "construct"
     url = "ws://#{@host}:#{@port}#{@path}socket?user=#{@user}&password=#{@password}"
     # console.log url
-    @socket.connect url, "construct.text.0.3"
+    @socket.connect url, "tegh.text.1.0"
 
   send: (msg) =>
     @blocking = true
     try
       @_attemptSend(msg)
     catch e
-      @emit "construct_error", {message: e}
+      @emit "tegh_error", {message: e}
       @_unblock()
 
   _attemptSend: (msg) =>
@@ -62,7 +61,7 @@ module.exports = class ConstructClient extends EventEmitter
       auth: "#{@user}:#{@password}"
     form.submit opts, (err, res) =>
       if err?
-        @emit "construct_error", err
+        @emit "tegh_error", err
       else
         @emit "ack", "Job added."
       @_unblock()
@@ -86,7 +85,7 @@ module.exports = class ConstructClient extends EventEmitter
 
     for msg in messages
       @emit "message", msg
-      type = (if msg.type == "error" then "construct_error" else msg.type)
+      type = (if msg.type == "error" then "tegh_error" else msg.type)
       @emit type, msg.data, msg.target
       # Unblocking if a synchronous error is thrown or the message was ack'd
       syncError = msg.type == "error" and msg.data.type.endsWith(".sync")

@@ -1,4 +1,4 @@
-ConstructDiscoverer = require './construct/discoverer'
+TeghDiscoverer = require './tegh/discoverer'
 EventEmitter = require('events').EventEmitter
 util = require 'util'
 keypress = require 'keypress'
@@ -12,7 +12,7 @@ stdin = process.stdin
 module.exports = class ServiceSelector extends EventEmitter
 
   constructor: () ->
-    @services = new ConstructDiscoverer()
+    @services = new TeghDiscoverer()
     @selected_index = 0
     @cursor = ansi(process.stdout)
     stdin.setRawMode(true)

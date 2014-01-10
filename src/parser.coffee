@@ -14,7 +14,7 @@ preprocessArgument = (arg) ->
   arg = false if arg == 'off'
   return arg
 
-# Parses a set command and returns a object that can be sent to a construct
+# Parses a set command and returns a object that can be sent to a tegh
 # server.
 parseSetArguments = (args) ->
   args[1] = args[1].remove(':')
