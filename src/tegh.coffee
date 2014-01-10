@@ -184,10 +184,10 @@ class Tegh
 
     cols = 12
     w = Math.round((@cli.width - cols) / cols)
-    colWidths = [        5,     25,                11,       7,    10,      10    ]
+    colWidths = [        8,     25,                11,       7,    10,      10    ]
     colWidths.unshift @cli.width - 8 - colWidths.sum()
     table = new Table
-      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id', 'Start', 'Total']
+      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id', 'Start', 'Elapsed']
       colWidths: colWidths
       style: { 'padding-left': 1, 'padding-right': 1 }
 
@@ -199,31 +199,37 @@ class Tegh
     else
       console.log table.toString()
 
+  _jobAttrStrings: (job, i) ->
+    prefix: "#{i}) #{job.file_name} "
+    id: job.id.pad(5)
+    status: job.status?.capitalize?() || "Queued"
+    profile:
+      if job.file_name.endsWith(/\.ngc|\.gcode/)
+        "N/A"
+      else
+        """
+        #{job.slicing_engine||@printer.slicing_engine} / 
+        #{job.slicing_profile||@printer.slicing_profile}
+        """.replace('\n', '').titleize()
+    start:
+      if job.start_time?
+        (new Date(job.start_time)).format('{12hr}:{mm} {TT}')
+      else
+        "N/A"
+    elapsed:
+      if job.elapsed_time?
+        @_formatTime(job.elapsed_time)
+      else
+        "N/A"
+    qty: "#{job.qty_printed}/#{job.qty}"
+
   _printJob: (table, job, i) =>
-    name = job.file_name
     if job.status == 'printing' then i = "X"
-    prefix = "#{i}) #{name} ";
-    if job.status == 'printing'
-      id = "N/A"
-    else
-      id = job.id.pad(5)
-    if job.file_name.endsWith(/\.ngc|\.gcode/)
-      profile = "N/A"
-    else
-      profile = "#{job.slicing_engine||@printer.slicing_engine} / "
-      profile += "#{job.slicing_profile||@printer.slicing_profile}"
-      profile = profile.titleize()
-    status = job.status?.capitalize?() || "Queued"
-    if job.start_time?
-      start = (new Date(job.start_time)).format('{12hr}:{mm} {TT}')
-    else
-      start = "N/A"
-    if job.elapsed_time?
-      elapsed = @_formatTime(job.elapsed_time)
-    else
-      elapsed = "N/A"
-    table.push [prefix, job.qty, profile, status, id, start, elapsed]
-    # line = line.green if job.status == 'printing'
+    keys = ['prefix', 'qty', 'profile', 'status', 'id', 'start', 'elapsed']
+    attrs = @_jobAttrStrings(job, i)
+    # color = if job.status == 'printing' then "\x1b[32m" else ""
+    # table.push keys.map (k) -> v = "#{color}#{attrs[k]}\x1b[\x1b[0m"
+    table.push keys.map (k) -> v = attrs[k]
 
   _formatTime: (millis) ->
     secs = millis / 1000
