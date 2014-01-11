@@ -86,6 +86,10 @@ module.exports =
       Start printing this printer's queued print jobs (see get_jobs and 
       add_job).
     """
+  retry_print:
+    description: """
+      Reprint an estopped print job.
+    """
   add_job:
     description: """
       Add a print job to the end of the printer's queue.
