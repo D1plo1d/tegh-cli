@@ -45,7 +45,7 @@ toJSON = (msg) ->
     data = {}
     for i in [0..args.length-1]
       continue if i.isOdd()
-      key = args[i].remove(':').replace('@', 'at')
+      key = args[i].remove(':').replace('@', 'at').replace(/e$/, 'e0')
       val = args[i+1]
       data[key] = val
   else
