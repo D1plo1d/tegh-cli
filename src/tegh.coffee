@@ -202,7 +202,7 @@ class Tegh
   _jobAttrStrings: (job, i) ->
     prefix: "#{i}) #{job.file_name} "
     id: job.id.pad(5)
-    status: job.status?.capitalize?() || "Queued"
+    status: job.status?.capitalize?()
     profile:
       if job.file_name.endsWith(/\.ngc|\.gcode/)
         "N/A"
