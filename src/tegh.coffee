@@ -278,13 +278,15 @@ class Tegh
     return status if @printer.status != "printing"
     total = 0
     current = 0
+    start_time = Number.MAX_VALUE
     for job in @jobs()
       continue unless job.status == "printing"
       total += job.total_lines || 0
       current += job.current_line || 0
+      start_time =  new Date(job.start_time) if job.start_time < start_time
     status += "( #{((100*current / total) || 0).format(2)}% ) "
-    time = ((new Date().getTime()) - job.start_time)
-    return status + " Elapsed: " + @_formatTime(time)
+    elapsed = @_formatTime new Date() - new Date(start_time)
+    return "#{status} Elapsed: #{elapsed} "
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
