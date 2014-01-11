@@ -220,8 +220,8 @@ class Tegh
       else
         "N/A"
     elapsed:
-      if job.elapsed_time?
-        @_formatTime(job.elapsed_time)
+      if job.status == 'printing'
+        @_formatTime new Date() - new Date(job.start_time)
       else
         "N/A"
     qty: "#{job.qty_printed}/#{job.qty}"
