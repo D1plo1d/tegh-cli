@@ -40,7 +40,7 @@ module.exports = class ServiceSelector extends EventEmitter
     @selected_index = max if @selected_index > max
     @selected_index = 0 if @selected_index < 0
 
-    for service, i in @services.list
+    for service, i in @services.list.sortBy 'serviceName'
       selected = i == @selected_index
 
       @cursor.write " ["
