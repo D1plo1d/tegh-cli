@@ -146,7 +146,8 @@ class Tegh
       Object.merge @printer[target], data
     else
       @printer[target] = data
-    @_onJobStarted @printer[target] if target.startsWith('job') and data.status?
+    if target.startsWith('job') and data.status?
+      @_onJobStatusChange @printer[target]
     @cli.render()
 
   _onClose: =>
@@ -168,8 +169,10 @@ class Tegh
     @cli.rl.prompt()
     @cli.render()
 
-  _onJobStarted: (job) =>
-    stdout.write "\r" + "Printing #{job.file_name}".green
+  _onJobStatusChange: (job) =>
+    msg = "#{job.status.capitalize()} #{job.file_name}"
+    color = if job.status == "estopped" then "yellow" else "green"
+    stdout.write "\r" + msg[color]
     console.log()
     @cli.rl.prompt()
 
