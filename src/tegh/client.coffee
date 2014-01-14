@@ -60,8 +60,11 @@ module.exports = class TeghClient extends EventEmitter
       path: "#{@path}jobs?session_uuid=#{@session_uuid}"
       auth: "#{@user}:#{@password}"
     form.submit opts, (err, res) =>
+      emitErr = (msg) => @emit "tegh_error", message: msg.toString()
       if err?
-        @emit "tegh_error", err
+        emitErr err
+      else if !(200 <= res.statusCode < 300 )
+        res.once 'data', emitErr
       else
         @emit "ack", "Job added."
       @_unblock()
@@ -76,7 +79,8 @@ module.exports = class TeghClient extends EventEmitter
     process.exit()
 
   _onInitialized: (data) =>
-    @session_uuid = data.session_uuid
+    console.log data
+    @session_uuid = data.session.uuid
 
   _onMessage: (m) =>
     # console.log m.utf8Data
