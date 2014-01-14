@@ -176,10 +176,13 @@ class Tegh
     console.log()
     @cli.rl.prompt()
 
-  _listJobs: =>
+  _jobs: =>
     jobs = []
     jobs = Object.findAll @printer, (k, v) -> k.startsWith /jobs\[[0-9]+\]$/
     jobs = Object.values jobs
+
+  _listJobs: =>
+    jobs = @_jobs()
 
     @cli.rl.pause()
     stdout.write("\r")
@@ -294,10 +297,20 @@ class Tegh
   _renderProgressBar: (data = {uploaded: 0, total: 1}) =>
     # console.log data
     p = (data.uploaded / data.total * 100).round()
+    return if p == @_previousUploadPercent
+    @_previousUploadPercent = p
     bar = "#{"#".repeat (p*2/10).round()}#{".".repeat (20-p*2/10).round()}"
     percent = "#{if p > 10 then "" else " "}#{p.round(1)}"
     c = @cli.cursor
-    c.hide().goto(0, @cli.height+1).write "uploading [#{bar}] #{percent}%"
+    c.hide().goto(0, @cli.height+1).write "Uploading [#{bar}] #{percent}%"
+    @_renderJobUploadNotice() if p == 100
+
+  _renderJobUploadNotice: =>
+    jobCount = @_jobs().length
+    are = if jobCount == 1 then "is" else "are"
+    text = "\nUploaded. There #{are} #{jobCount||"no"} print jobs ahead of yours"
+    console.log text
+
 
   _parseLine: (line) =>
     line = line.toString().trim()
@@ -314,6 +327,7 @@ class Tegh
     else if cmd == "get_jobs" then @_listJobs()
     else if cmd == "exit" then process.exit()
     else if @commands[cmd]?
+      @_lastCmd = cmd
       try
         # Temporarily overriding readline's _ttyWrite to pause the CLI input.
         @cli.rl._ttyWrite = ( -> )
