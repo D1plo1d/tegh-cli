@@ -308,8 +308,8 @@ class Tegh
   _renderJobUploadNotice: =>
     jobCount = @_jobs().length
     are = if jobCount == 1 then "is" else "are"
-    text = "\nUploaded. There #{are} #{jobCount||"no"} print jobs ahead of yours"
-    console.log text
+    text = "Uploaded. There #{are} #{jobCount||"no"} print jobs ahead of yours"
+    console.log "\n#{text}"
 
 
   _parseLine: (line) =>
