@@ -33,7 +33,10 @@ postProcess = (msg) -> switch msg.action
   when "extrude" then msg.action = "move"
 
 toJSON = (msg) ->
-  words = msg.replace(":", ": ").words()
+  action = msg.toLowerCase().words()[0]
+  msg = msg.replace "@", "at:" if action == "move"
+  msg = msg.replace(/\:/g, ": ").replace(/\s+/g, " ") if action != "add_job"
+  words = msg.words()
   args = words[1..].compact().map preprocessArgument
 
   # Figure out if the arguments are a hash
@@ -50,12 +53,13 @@ toJSON = (msg) ->
     data = {}
     for i in [0..args.length-1]
       continue if i.isOdd()
-      key = args[i].remove(':').replace('@', 'at').replace(/e$/, 'e0')
+      key = args[i].remove(':').replace(/e$/, 'e0')
       val = args[i+1]
       data[key] = val
   else
     data = args
-  outputMsg = action: words[0], data: data
+  data.at = parseFloat(data.at.replace "%", "")/100 if data.at?
+  outputMsg = action: action, data: data
   postProcess outputMsg
   # console.log data
   return JSON.stringify outputMsg
