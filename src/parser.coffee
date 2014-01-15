@@ -27,6 +27,9 @@ parseSetArguments = (args) ->
   ( ( data = {} )[key1] = {} )[key2] = args[2]
   return data
 
+postProcess = (msg) -> switch msg.action
+  when "extrude" then msg.action = "move"
+
 toJSON = (msg) ->
   words = msg.replace(":", ": ").words()
   args = words[1..].compact().map preprocessArgument
@@ -50,9 +53,9 @@ toJSON = (msg) ->
       data[key] = val
   else
     data = args
+  outputMsg = action: words[0], data: data
+  postProcess outputMsg
   # console.log data
-  return JSON.stringify
-    action: words[0]
-    data: data
+  return JSON.stringify outputMsg
 
 module.exports = toJSON: toJSON

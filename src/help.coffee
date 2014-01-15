@@ -47,6 +47,22 @@ module.exports =
   #     description: """
   #       stop all axes of the printer that are moving continuously.
   #     """
+  extrude:
+    description: """
+      extrude or reverse the printer's filament.
+    """
+    # description: """
+    #   move the printer either a fixed distance (default) or 
+    #   until stopped (via ++ or -- values, if available).
+    # """
+    arg_tree:
+      e: {value:null}
+      e0: {value:null}
+      e1: {value:null}
+      e2: {value:null}
+    optional_args: ["e", "e0", "e1", "e2"]
+    examples:
+      "push 10mm of filament through the primary extruder": "extrude e0: 10"
   set:
     description: """
       set one or more settings on the printer. The printer's settings are
