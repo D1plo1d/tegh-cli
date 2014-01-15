@@ -6,6 +6,7 @@ sugar = require 'sugar'
 setKeys =
   fan: 'f'
   conveyor: 'c'
+  motors: 'motors'
 
 preprocessArgument = (arg) ->
   arg = arg.trim()
@@ -19,10 +20,11 @@ preprocessArgument = (arg) ->
 parseSetArguments = (args) ->
   args[1] = args[1].remove(':')
   args[1] = 'e0' if args[1] == 'e'
-  if args[0] == 'temp'
-    [key1, key2] = [ args[1], 'target_temp' ]
-  else
-    [key1, key2] = [ setKeys[args[0]], args[1] ]
+  switch args[0]
+    when 'temp'
+      [key1, key2] = [ args[1], 'target_temp' ]
+    else
+      [key1, key2] = [ setKeys[args[0]], args[1] ]
   # Creating the data
   ( ( data = {} )[key1] = {} )[key2] = args[2]
   return data
