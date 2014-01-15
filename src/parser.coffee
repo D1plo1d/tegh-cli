@@ -58,7 +58,7 @@ toJSON = (msg) ->
       data[key] = val
   else
     data = args
-  data.at = parseFloat(data.at.replace "%", "")/100 if data.at?
+  data.at = parseFloat(data.at.replace "%", "")/100 if data?.at?
   outputMsg = action: action, data: data
   postProcess outputMsg
   # console.log data
