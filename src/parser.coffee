@@ -10,7 +10,7 @@ setKeys =
 
 preprocessArgument = (arg) ->
   arg = arg.trim()
-  arg = parseFloat(arg) if arg.match /^[\d\.]+$/
+  arg = parseFloat(arg) if arg.match /^\-?[\d\.]+$/
   arg = true if arg == 'on'
   arg = false if arg == 'off'
   return arg
@@ -41,7 +41,6 @@ postProcess = (msg) -> switch msg.action
     msg.action = "set"
     msg.target = "jobs[#{msg.data.id}]"
     delete msg.data.id
-    console.log msg
 
 toJSON = (msg) ->
   action = msg.toLowerCase().words()[0]
