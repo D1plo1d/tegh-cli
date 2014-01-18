@@ -30,7 +30,18 @@ parseSetArguments = (args) ->
   return data
 
 postProcess = (msg) -> switch msg.action
-  when "extrude" then msg.action = "move"
+  when "extrude"
+    msg.action = "move"
+  when "rm_job"
+    msg.action = "rm"
+    msg.data = "jobs[#{msg.data.id}]"
+  when "home"
+    msg.data = ['x', 'y', 'z'] if msg.data == null
+  when "change_job"
+    msg.action = "set"
+    msg.target = "jobs[#{msg.data.id}]"
+    delete msg.data.id
+    console.log msg
 
 toJSON = (msg) ->
   action = msg.toLowerCase().words()[0]
@@ -58,7 +69,8 @@ toJSON = (msg) ->
       data[key] = val
   else
     data = args
-  data.at = parseFloat(data.at.replace "%", "")/100 if data?.at?
+  if data?.at? and ( action == "move" or action == "extrude" )
+    data.at = parseFloat(data.at.replace?("%", "")||""+data.at)/100
   outputMsg = action: action, data: data
   postProcess outputMsg
   # console.log data

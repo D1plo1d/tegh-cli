@@ -233,6 +233,7 @@ class Tegh
     if job.status == 'printing' then i = "X"
     keys = ['prefix', 'qty', 'profile', 'status', 'id', 'start', 'elapsed']
     attrs = @_jobAttrStrings(job, i)
+    console.log job
     # color = if job.status == 'printing' then "\x1b[32m" else ""
     # table.push keys.map (k) -> v = "#{color}#{attrs[k]}\x1b[\x1b[0m"
     table.push keys.map (k) -> v = attrs[k]
@@ -277,19 +278,22 @@ class Tegh
     Object.values Object.select @printer, /^jobs\[/
 
   _rHeader: ->
-    status = "Status: #{@printer.status.capitalize()} "
-    return status if @printer.status != "printing"
+    status = "Status: #{@printer.state.status.capitalize()} "
+    return status if @printer.state.status != "printing"
     total = 0
     current = 0
-    start_time = Number.MAX_VALUE
+    startTime = Number.MAX_VALUE
     for job in @jobs()
       continue unless job.status == "printing"
       total += job.total_lines || 0
       current += job.current_line || 0
-      start_time =  new Date(job.start_time) if job.start_time < start_time
+      startTime = new Date(job.start_time) if job.start_time < startTime
     status += "( #{((100*current / total) || 0).format(2)}% ) "
-    elapsed = @_formatTime new Date() - new Date(start_time)
-    return "#{status} Elapsed: #{elapsed} "
+
+    if startTime < Number.MAX_VALUE
+      elapsed = @_formatTime new Date() - new Date(startTime)
+      status += " Elapsed: #{elapsed} "
+    return status
 
   _append: (s, prefix = "") ->
     stdout.write(prefix + s + "\n")
