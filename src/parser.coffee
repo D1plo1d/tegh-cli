@@ -45,7 +45,7 @@ postProcess = (msg) -> switch msg.action
 
 toJSON = (msg) ->
   action = msg.toLowerCase().words()[0]
-  msg = msg.replace "@", "at:" if action == "move"
+  msg = msg.replace "@", "at:" if action == "move" or action == "extrude"
   msg = msg.replace(/\:/g, ": ").replace(/\s+/g, " ") if action != "add_job"
   words = msg.words()
   args = words[1..].compact().map preprocessArgument
@@ -73,7 +73,7 @@ toJSON = (msg) ->
     data.at = parseFloat(data.at.replace?("%", "")||""+data.at)/100
   outputMsg = action: action, data: data
   postProcess outputMsg
-  # console.log outputMsg
+  console.log outputMsg
   return JSON.stringify outputMsg
 
 module.exports = toJSON: toJSON
