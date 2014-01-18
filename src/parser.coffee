@@ -39,8 +39,9 @@ postProcess = (msg) -> switch msg.action
     msg.data = ['x', 'y', 'z'] if msg.data == null
   when "change_job"
     msg.action = "set"
-    msg.target = "jobs[#{msg.data.id}]"
-    delete msg.data.id
+    data = {}
+    data["jobs[#{msg.data.id}]"] = Object.reject msg.data, "id"
+    msg.data = data
 
 toJSON = (msg) ->
   action = msg.toLowerCase().words()[0]
@@ -72,7 +73,7 @@ toJSON = (msg) ->
     data.at = parseFloat(data.at.replace?("%", "")||""+data.at)/100
   outputMsg = action: action, data: data
   postProcess outputMsg
-  # console.log data
+  # console.log outputMsg
   return JSON.stringify outputMsg
 
 module.exports = toJSON: toJSON
