@@ -17,11 +17,12 @@ module.exports = class TeghClient extends EventEmitter
 
     @.on "initialized", @_onInitialized
 
-    @socket = new WebSocketClient(webSocketVersion: 8)
+    @socket = new WebSocketClient webSocketVersion: 8, tlsOptions:
+      rejectUnauthorized: false
     @socket.on "connect", @_onConnect
     @socket.on 'connectFailed', @_onConnectionFailed
 
-    url = "ws://#{@host}:#{@port}#{@path}socket?user=#{@user}&password=#{@password}"
+    url = "wss://#{@host}:#{@port}#{@path}socket?user=#{@user}&password=#{@password}"
     # console.log url
     @socket.connect url, "tegh.text.1.0"
 

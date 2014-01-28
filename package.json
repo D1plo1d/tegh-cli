@@ -13,7 +13,7 @@
     , "cli-table": "*"
     , "request": "*"
     , "form-data": "git+https://github.com/D1plo1d/node-form-data.git"
-    , "websocket": "*"
+    , "websocket": "git+https://github.com/Worlize/WebSocket-Node.git"
     , "keypress": ">=0.2"
     , "ansi": "*"
     , "colors": "*"
