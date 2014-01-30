@@ -13,7 +13,7 @@
     , "cli-table": "*"
     , "request": "*"
     , "form-data": "git+https://github.com/D1plo1d/node-form-data.git"
-    , "websocket": "git+https://github.com/Worlize/WebSocket-Node.git"
+    , "ws": "*"
     , "keypress": ">=0.2"
     , "ansi": "*"
     , "colors": "*"
@@ -21,6 +21,7 @@
     , "flavored-path": "*"
     , "native-dns": "*"
     , "exec-sync": "*"
+    , "prompt": "*"
   },
     "engines": {
     "node": "~0.10.x",

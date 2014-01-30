@@ -10,6 +10,7 @@ fs = require "fs-extra"
 touch = require "touch"
 path = require ("flavored-path")
 Table = require 'cli-table'
+prompt = require 'prompt'
 
 stdout = process.stdout
 stdin = process.stdin
@@ -111,11 +112,16 @@ class Tegh
   constructor: ->
     new ServiceSelector().on "select", @_onServiceSelect
 
-  _onServiceSelect: (service) =>
+  _onServiceSelect: (@service) =>
     clear()
+    @_connect()
+
+  _connect: (user, pwd) =>
+    host = @service.address
+    host = "#{user}:#{pwd}@#{host}" if user?
     port = 2540
-    stdout.write "Connecting to #{service.address}/#{service.serviceName}..."
-    @client = new TeghClient(service.address, port, service.path)
+    stdout.write "Connecting to #{@service.address}/#{@service.serviceName}..."
+    @client = new TeghClient(host, port, @service.path)
       .on("initialized", @_onInit)
       .on("add", @_onAdd)
       .on("rm", @_onRm)
@@ -123,7 +129,32 @@ class Tegh
       .on("ack", @_onAck)
       .on("tegh_error", @_onError)
       .on("unblocked", @_onUnblocked)
+      .on("unauthorized", @_onUnauthorized)
+      .on("badcert", @_onBadCert)
       .on("close", @_onClose)
+
+  _onUnauthorized: =>
+    @client.removeAllListeners()
+    clear()
+    prompt.message = ""
+    prompt.delimiter = ""
+    prompt.colors = false
+    schema = properties:
+      username: {required: true, description: "Username:"}
+      password: {required: true, description: "Password:", hidden: true}
+    prompt.start()
+    if @multipleLoginAttempts
+      console.log "Bad username/password. Try again.\n"
+    else
+      console.log "Secure 3D Printer. Login Required.\n"
+    @multipleLoginAttempts = true
+    prompt.get schema, (err, result) =>
+      throw err if err?
+      console.log result
+      @_connect result.username, result.password
+
+  _onBadCert: =>
+    # TODO!
 
   _onInit: (data) =>
     @printer = data

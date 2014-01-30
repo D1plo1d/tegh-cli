@@ -1,5 +1,5 @@
 EventEmitter = require('events').EventEmitter
-WebSocketClient = require('websocket').client
+WebSocket = require('ws')
 request = require 'request'
 FormData = require 'form-data'
 sugar = require 'sugar'
@@ -12,19 +12,16 @@ module.exports = class TeghClient extends EventEmitter
   blocking: false
 
   constructor: (@host, @port, @path) ->
-    @user = "admin"
-    @password = "admin"
-
+    url = "wss://#{@host}:#{@port}#{@path}socket"
     @.on "initialized", @_onInitialized
-
-    @socket = new WebSocketClient webSocketVersion: 8, tlsOptions:
+    @ws = new WebSocket url,
+      webSocketVersion: 8
       rejectUnauthorized: false
-    @socket.on "connect", @_onConnect
-    @socket.on 'connectFailed', @_onConnectionFailed
-
-    url = "wss://#{@host}:#{@port}#{@path}socket?user=#{@user}&password=#{@password}"
-    # console.log url
-    @socket.connect url, "tegh.text.1.0"
+    @ws
+    .on('open', @_onOpen)
+    .on('close', @_onClose)
+    .on('message', @_onMessage)
+    .on('error', @_onError)
 
   send: (msg) =>
     @blocking = true
@@ -38,7 +35,7 @@ module.exports = class TeghClient extends EventEmitter
     return @_addJob(msg) if msg.indexOf("add_job") == 0
     json = parser.toJSON(msg)
     # console.log json
-    @connection.sendUTF json
+    @ws.send json
 
   # sends the add_job command as a http post multipart form request
   _addJob: (msg) =>
@@ -56,10 +53,10 @@ module.exports = class TeghClient extends EventEmitter
     form.append('job', fs.createReadStream(filePath))
 
     opts = 
-      host: @host
+      host: @host.split("@")[1] || @host
       port: @port
       path: "#{@path}jobs?session_uuid=#{@session_uuid}"
-      auth: "#{@user}:#{@password}"
+      auth: @host.split("@")[0]
     form.submit opts, (err, res) =>
       emitErr = (msg) => @emit "tegh_error", message: msg.toString()
       if err?
@@ -70,22 +67,15 @@ module.exports = class TeghClient extends EventEmitter
         @emit "ack", "Job added."
       @_unblock()
 
-  _onConnect: (@connection) =>
-    @emit "connect", @connection
-    @connection.on 'message', @_onMessage
-    @connection.on 'close', @_onClose
-
-  _onConnectionFailed: (error) =>
-    stdout.write 'Connect Error: ' + error.toString() + "\n"
-    process.exit()
+  _onOpen: =>
+    @emit "connect", @ws
 
   _onInitialized: (data) =>
     console.log data
     @session_uuid = data.session.uuid
 
   _onMessage: (m) =>
-    # console.log m.utf8Data
-    messages = JSON.parse m.utf8Data
+    messages = JSON.parse m
     # console.log messages
 
     for msg in messages
@@ -102,4 +92,8 @@ module.exports = class TeghClient extends EventEmitter
 
   _onClose: () =>
     @emit "close"
-    
+
+  _onError: (e) =>
+    unauthorized = e.toString().indexOf("unexpected server response (401)") > -1
+    throw e unless unauthorized
+    @emit "unauthorized"
