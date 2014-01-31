@@ -73,17 +73,21 @@ module.exports =
       - fan: enable/disable the printer's fan
     """
     arg_tree:
-      temp:
-        e: {value: null}
-        b: {value: null}
-      fan:
-        enabled: {on: null, off: null}
+      e:   {temp: null, on: null, off: null}
+      # TODO: dynamically vary the number of extruders
+      e0:  {temp: null, on: null, off: null}
+      e1:  {temp: null, on: null, off: null}
+      e2:  {temp: null, on: null, off: null}
+      b:   {temp: null, on: null, off: null}
+      fan: {on: null, off: null}
     optional_args: ["e", "b", "fan", "motors"]
     # optional_args: ["e", "b"]# Proposed Additions: ["e", "e0", "e1", "e2", "b"]
     examples:
-      "Start heating the extruder to 220\u00B0C": "set temp e0: 220"
-      "Set the extruder's target temp. to 0\u00B0C (off)": "set temp e0: 0"
-      "Start heating the bed to 100\u00B0C": "set temp b: 100"
+      "Start heating the extruder": "set e0 on"
+      "Stop heating the extruder": "set e0 off"
+      "Start heating the extruder to 220\u00B0C": "set e0 temp: 220"
+      "Set the extruder's target temp. to 0\u00B0C (off)": "set e0 temp: 0"
+      "Start heating the bed to 100\u00B0C": "set b temp: 100"
       "Enable the printer's motors": "set motors on"
       "Disable the printer's motors": "set motors off"
       "Enable the printer's fan": "set fan on"
