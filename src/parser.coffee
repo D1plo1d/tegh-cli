@@ -21,18 +21,16 @@ parseSetArguments = (args) ->
   args[1] = args[1].remove(':') if typeof args[1] == 'string'
   args[0] = 'e0' if args[0] == 'e'
   args[0] = setKeys[args[0]] unless args[0][0] == 'e' or args[0][0] == 'b'
-  switch args[1]
+  # Creating the data
+  data = {}
+  data[args[0]] = switch args[1]
     when 'temp'
-      attrName = 'target_temp'
-      value = args[2]
+      enabled: true, target_temp: args[2]
     when true, false
       throw "Error: Invalid command" if args.length > 2
-      attrName = 'enabled'
-      value = args[1]
+      enabled: args[1]
     else
       throw "Error: Invalid command"
-  # Creating the data
-  ( ( data = {} )[args[0]] = {} )[attrName] = value
   return data
 
 postProcess = (msg) -> switch msg.action
