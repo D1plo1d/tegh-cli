@@ -4,7 +4,6 @@ request = require 'request'
 FormData = require 'form-data'
 sugar = require 'sugar'
 fs = require 'fs-extra'
-parser = require '../parser'
 
 stdout = process.stdout
 
@@ -32,14 +31,13 @@ module.exports = class TeghClient extends EventEmitter
       @_unblock()
 
   _attemptSend: (msg) =>
-    return @_addJob(msg) if msg.indexOf("add_job") == 0
-    json = parser.toJSON(msg)
+    return @_addJob(msg) if msg.action == "add_job"
     # console.log json
-    @ws.send json
+    @ws.send JSON.stringify msg
 
   # sends the add_job command as a http post multipart form request
   _addJob: (msg) =>
-    filePath = msg.replace(/^add_job/, "").trim()
+    filePath = msg.data
 
     if !filePath? or filePath.length == 0
       throw "add_job requires a file path (ex: add_job ~/myfile.gcode)"

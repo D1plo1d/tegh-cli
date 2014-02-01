@@ -5,8 +5,9 @@
   , "main": "./src/tegh"
   , "dependencies": {
     "express": "3.x" 
-    , "coffee-script": "1.6.3"
+    , "coffee-script": "1.7.x"
     , "sugar": "*"
+    , "lodash": "*"
     , "fs-extra": "*"
     , "js-yaml": "*"
     , "glob": "*"
@@ -22,6 +23,8 @@
     , "native-dns": "*"
     , "exec-sync": "*"
     , "prompt": "*"
+    , "mocha": "*"
+    , "chai": "*"
   },
     "engines": {
     "node": "~0.10.x",

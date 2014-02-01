@@ -1,22 +1,46 @@
-module.exports =
+_ = require "lodash"
+module.exports = (data) ->
+
+
+  # Non-websocket commands. These do not send a request to the server through 
+  # the websocket.
   help:
     description: """
       display help text
     """
+    websocket: false
   exit:
     description: """
       exit the console (note: this does *not* stop the printer)
     """
+    websocket: false
+  get_jobs:
+    description: """
+      Gets a list of the jobs in the printer's queue.
+    """
+    websocket: false
+  add_job:
+    description: """
+      Add a print job to the end of the printer's queue.
+    """
+    examples:
+      "add example.gcode to the print queue": "add_job ./example.gcode"
+    argTree: ->
+      value: null
+    websocket: false
+
+
+  # Websocket commands. These commands generate json data which is sent to the 
+  # server via the websocket.
   home:
     description: """
       home the printer's axes. Specifing individual axes will only home those 
       axes.
     """
-    arg_tree:
+    argTree: ->
       x: null
       y: null
       z: null
-    optional_args: ["x", "y", "z"]
     examples:
       "home all axes": "home"
       "home the y axis": "home y"
@@ -29,16 +53,20 @@ module.exports =
     #   move the printer either a fixed distance (default) or 
     #   until stopped (via ++ or -- values, if available).
     # """
-    arg_tree:
-      x: {value:null}
-      y: {value:null}
-      z: {value:null}
-      e: {value:null}
-    optional_args: ["x", "y", "z", "e"]
+    argTree: ->
+      # Adding extruders
+      tree = _(data).pick((c) -> c.type == 'heater').map -> {value: null}
+      # Adding axes
+      tree.merge
+        x: {value:null}
+        y: {value:null}
+        z: {value:null}
+      tree.value()
+
     # optional_args: ["continuous", "x", "y", "z", "e"]
     examples:
-      "move the x axis 10mm to the right": "move x: 10"
-      "move the x axis 10mm and the y axis 10mm at 200% feedrate": "move x:10 y:10 @ 200%"
+      "move the x axis 10mm to the right": "move x 10"
+      "move the x axis 10mm and the y axis 10mm at 200% feedrate": "move x 10 y 10 @ 200%"
       # Proposed Additions:
       #   "move the y axis forward until stopped": "move y: ++"
       #   "move the y axis backward until stopped": "move y: --"
@@ -51,18 +79,12 @@ module.exports =
     description: """
       extrude or reverse the printer's filament.
     """
-    # description: """
-    #   move the printer either a fixed distance (default) or 
-    #   until stopped (via ++ or -- values, if available).
-    # """
-    arg_tree:
-      e: {value:null}
-      e0: {value:null}
-      e1: {value:null}
-      e2: {value:null}
-    optional_args: ["e", "e0", "e1", "e2"]
+    argTree: ->
+      console.log _(data).pick((c) -> c.type == 'heater').value()
+      tree = _(data).pick((c) -> c.type == 'heater').map -> {value: null}
+      tree.value()
     examples:
-      "push 10mm of filament through the primary extruder": "extrude e0: 10"
+      "push 10mm of filament through the primary extruder": "extrude e0 10"
   set:
     description: """
       set one or more settings on the printer. The printer's settings are
@@ -72,31 +94,30 @@ module.exports =
       - motors: enable/disable the printer's motors
       - fan: enable/disable the printer's fan
     """
-    arg_tree:
-      e:   {temp: null, on: null, off: null}
-      # TODO: dynamically vary the number of extruders
-      e0:  {temp: null, on: null, off: null}
-      e1:  {temp: null, on: null, off: null}
-      e2:  {temp: null, on: null, off: null}
-      b:   {temp: null, on: null, off: null}
-      fan: {on: null, off: null}
-    optional_args: ["e", "b", "fan", "motors"]
-    # optional_args: ["e", "b"]# Proposed Additions: ["e", "e0", "e1", "e2", "b"]
+    argTree: ->
+      # Adding extruders and heated beds to the arg tree
+      tree = _(data).pick((c) -> c.type == 'heater').map ->
+        {temp: null, on: null, off: null}
+      # Adding fans and conveyors to the arg tree
+      tree.merge fan: {on: null, off: null} if data.f?
+      tree.merge conveyor: {on: null, off: null} if data.c?
+      # Returning the arg tree
+      tree.value()
+
     examples:
       "Start heating the extruder": "set e0 on"
       "Stop heating the extruder": "set e0 off"
       "Start heating the extruder to 220\u00B0C": "set e0 temp: 220"
       "Set the extruder's target temp. to 0\u00B0C (off)": "set e0 temp: 0"
       "Start heating the bed to 100\u00B0C": "set b temp: 100"
+      "move job #AH5H5 to the top of the queue": "set AH5H5 position: 0"
+      "make job #AH5H5 the second next job in the queue": "set AH5H5 position: 1"
       "Enable the printer's motors": "set motors on"
       "Disable the printer's motors": "set motors off"
       "Enable the printer's fan": "set fan on"
       "Disable the printer's fan": "set fan off"
       "Enable the printer's conveyor or ABP": "set conveyor on"
       "Disable the printer's conveyor or ABP": "set conveyor off"
-      # Proposed Additions:
-      #   set temp e0:220 e1:0 b:100
-      #   set feedrate xy: 100 z: 1
   estop:
     description: """
       Emergency stop. Stop all dangerous printer activity immediately.
@@ -110,40 +131,11 @@ module.exports =
     description: """
       Reprint an estopped print job.
     """
-  add_job:
-    description: """
-      Add a print job to the end of the printer's queue.
-    """
-    required_args: ["file"]
-    # optional_args: ["qty"]
-    examples:
-      "add example.gcode to the print queue": "add_job ./example.gcode"
   rm_job:
     description: """
       Remove a print job from the printer's queue by it's ID.
     """
-    arg_tree: { "id:": {job_id:null} }
-    required_args: ["id:"]
     examples:
-      "delete job #5": "rm_job id: 5"
-  change_job:
-    description: """
-      Change a print job's position in the printer's queue.
-    """
-    # description: """
-    #   Change a print job's quantity or position in the queue.
-    # """
-    arg_tree:
-      "id:":
-        job_id:
-          position : {value : null }
-          qty : {value: null}
-    required_args: ["id:"]
-    optional_args: ["position"] # ["qty", "position"]
-    examples:
-      "move job #3 to the top of the queue": "change_job id: 3 position: 0"
-      "make job #12 the second next job in the queue": "change_job id: 12 position: 1"
-  get_jobs:
-    description: """
-      Gets a list of the jobs in the printer's queue.
-    """
+      "delete job #AH5H5": "rm_job AH5H5"
+    argTree: ->
+      value: null

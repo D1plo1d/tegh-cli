@@ -11,6 +11,7 @@ touch = require "touch"
 path = require ("flavored-path")
 Table = require 'cli-table'
 prompt = require 'prompt'
+parser = require './parser'
 
 stdout = process.stdout
 stdin = process.stdin
@@ -106,7 +107,6 @@ class CliConsole
 
 
 class Tegh
-  commands: require './help'
   tempDevices: {}
 
   constructor: ->
@@ -158,6 +158,7 @@ class Tegh
 
   _onInit: (data) =>
     @printer = data
+    @commands = require('./commands')(data)
     # console.log @printer
     @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
     @cli = new CliConsole(@)
@@ -361,22 +362,18 @@ class Tegh
     if cmd == "help" then @_appendHelp(words[0])
     else if cmd == "get_jobs" then @_listJobs()
     else if cmd == "exit" then process.exit()
-    else if @commands[cmd]?
-      @_lastCmd = cmd
+    else
       try
         # Temporarily overriding readline's _ttyWrite to pause the CLI input.
         @cli.rl._ttyWrite = ( -> )
         # Sending the command
-        @client.send(line)
+        @client.send parser.toJSON line, @commands
+        @_lastCmd = cmd
         @cli.render()
         return
       catch e
         @_append "Error: #{e}"
-    else
-      @_append """
-        Error: '#{cmd}' is not a valid command.
-        Try typing 'help' for more info.
-      """
+        @_onUnblocked()
     @cli.render()
 
   _appendHelp: (cmd) ->
@@ -455,12 +452,12 @@ class Tegh
     for word in words_tmp
       words.push word if word
 
-    # Find arg_tree from  command
+    # Find argTree from  command
     current_args_tree = {}
     for cmd,data of @commands
-      if cmd == words[0] && data.arg_tree?
+      if cmd == words[0] && data.argTree?
         # Recurse through existing word list to find base tree:
-        current_args_tree = @_autocomplete_recurse_to(line,data.arg_tree)
+        current_args_tree = @_autocomplete_recurse_to(line,data.argTree())
         break
 
     if current_args_tree != {}
