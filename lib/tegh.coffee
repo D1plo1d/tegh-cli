@@ -136,7 +136,6 @@ class Tegh
       .on("badcert", @_onBadCert)
 
   _onUnauthorized: =>
-    @client.removeAllListeners()
     clear()
     prompt.message = ""
     prompt.delimiter = ""
@@ -156,7 +155,6 @@ class Tegh
       @_connect result.username, result.password
 
   _onBadCert: (ip, cert) =>
-    @client.removeAllListeners()
     clear()
     console.log """
     The authenticity of host '#{cert.printer}(#{ip})' can't be established.

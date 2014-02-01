@@ -75,8 +75,9 @@ module.exports = class TeghClient extends EventEmitter
     if isKnownHost
       @emit "connect", @ws
     else
-      @ws.close()
       @emit "badcert", @host, cert
+      @removeAllListeners()
+      @ws.close()
 
   _onInitialized: (data) =>
     console.log data
@@ -105,6 +106,7 @@ module.exports = class TeghClient extends EventEmitter
     unauthorized = e.toString().indexOf("unexpected server response (401)") > -1
     throw e unless unauthorized
     @emit "unauthorized"
+    @removeAllListeners()
 
 TeghClient.addCert = (cert) ->
   file = flavoredPath.resolve "~/.tegh/known_hosts.json"
