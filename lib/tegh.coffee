@@ -117,8 +117,10 @@ class Tegh
     @_connect()
 
   _connect: (user, pwd) =>
+    @user = user if user?
+    @pwd = pwd if pwd?
     host = @service.address
-    host = "#{user}:#{pwd}@#{host}" if user?
+    host = "#{@user}:#{@pwd}@#{host}" if @user?
     port = 2540
     stdout.write "Connecting to #{@service.address}/#{@service.serviceName}..."
     @client = new TeghClient(host, port, @service.path)
@@ -129,9 +131,9 @@ class Tegh
       .on("ack", @_onAck)
       .on("tegh_error", @_onError)
       .on("unblocked", @_onUnblocked)
+      .on("close", @_onClose)
       .on("unauthorized", @_onUnauthorized)
       .on("badcert", @_onBadCert)
-      .on("close", @_onClose)
 
   _onUnauthorized: =>
     @client.removeAllListeners()
@@ -153,8 +155,21 @@ class Tegh
       console.log result
       @_connect result.username, result.password
 
-  _onBadCert: =>
-    # TODO!
+  _onBadCert: (ip, cert) =>
+    @client.removeAllListeners()
+    clear()
+    console.log """
+    The authenticity of host '#{cert.printer}(#{ip})' can't be established.
+    DSA key fingerprint is #{cert.fingerprint}.
+    Are you sure you want to continue connecting (yes/no)?
+    """
+    stdin.setRawMode true
+    stdin.on 'keypress', (key) =>
+      process.exit() if key == '\u0003' or key == `'\4'` or key == 'n'
+      return unless key == 'y'
+      stdin.setRawMode false
+      TeghClient.addCert(cert)
+      @_connect()
 
   _onInit: (data) =>
     @printer = data

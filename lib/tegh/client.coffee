@@ -4,6 +4,8 @@ request = require 'request'
 FormData = require 'form-data'
 sugar = require 'sugar'
 fs = require 'fs-extra'
+flavoredPath = require ("flavored-path")
+_ = require 'lodash'
 
 stdout = process.stdout
 
@@ -11,6 +13,7 @@ module.exports = class TeghClient extends EventEmitter
   blocking: false
 
   constructor: (@host, @port, @path) ->
+    @_knownHosts = require flavoredPath.resolve "~/.tegh/known_hosts.json"
     url = "wss://#{@host}:#{@port}#{@path}socket"
     @.on "initialized", @_onInitialized
     @ws = new WebSocket url,
@@ -66,7 +69,14 @@ module.exports = class TeghClient extends EventEmitter
       @_unblock()
 
   _onOpen: =>
-    @emit "connect", @ws
+    cert = @ws._sender._socket.getPeerCertificate()
+    cert.printer = @path.split("/")[2]
+    isKnownHost = _.find(@_knownHosts, cert)?
+    if isKnownHost
+      @emit "connect", @ws
+    else
+      @ws.close()
+      @emit "badcert", @host, cert
 
   _onInitialized: (data) =>
     console.log data
@@ -95,3 +105,9 @@ module.exports = class TeghClient extends EventEmitter
     unauthorized = e.toString().indexOf("unexpected server response (401)") > -1
     throw e unless unauthorized
     @emit "unauthorized"
+
+TeghClient.addCert = (cert) ->
+  file = flavoredPath.resolve "~/.tegh/known_hosts.json"
+  knownHosts = require file
+  knownHosts.push cert
+  fs.writeFileSync file, JSON.stringify knownHosts
