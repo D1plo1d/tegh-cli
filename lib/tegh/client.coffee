@@ -51,13 +51,15 @@ module.exports = class TeghClient extends EventEmitter
 
     form = new FormData()
 
-    form.append('job', fs.createReadStream(filePath))
+    form.append('file', fs.createReadStream(filePath))
 
-    opts = 
+    opts =
+      protocol: "https:"
       host: @host.split("@")[1] || @host
       port: @port
-      path: "#{@path}jobs?session_uuid=#{@session_uuid}"
+      path: "#{@path}?session_uuid=#{@session_uuid}"
       auth: @host.split("@")[0]
+      rejectUnauthorized: false
     form.submit opts, (err, res) =>
       emitErr = (msg) => @emit "tegh_error", message: msg.toString()
       if err?
@@ -80,7 +82,7 @@ module.exports = class TeghClient extends EventEmitter
       @ws.close()
 
   _onInitialized: (data) =>
-    console.log data
+    # console.log data
     @session_uuid = data.session.uuid
 
   _onMessage: (m) =>

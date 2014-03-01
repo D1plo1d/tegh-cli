@@ -93,7 +93,7 @@ class CliConsole
     c.savePosition().goto(0, 0)
     c.black().bg.white()
 
-    # The 10 character padding is to offset against ascii color codes in the 
+    # The 10 character padding is to offset against ascii color codes in the
     # header.
     rHeaderLength = rHeader.length - Object.keys(@src.tempDevices).length*10
     spaces = Math.max 0, @width - lHeader.length - rHeaderLength
@@ -173,7 +173,7 @@ class Tegh
     @printer = data
     @commands = require('./commands')(data)
     # console.log @printer
-    @tempDevices = Object.findAll @printer, (k, v) -> k.startsWith /e[0-9]+$|b$/
+    @tempDevices = Object.findAll @printer, (k, v) -> v.type == 'heater'
     @cli = new CliConsole(@)
     @cli.render()
 
@@ -184,15 +184,15 @@ class Tegh
     delete @printer[target]
 
   _onChange: (data, target) =>
-    @_renderProgressBar(data) if target == 'job_upload_progress'
+    @_renderProgressBar(data) if target == 'upload_progress'
     # Finding the target from it's path, updating it and re-rendering
 
     if Object.isObject data
       Object.merge @printer[target], data
     else
       @printer[target] = data
-    if target.startsWith('job') and data.status?
-      @_onJobStatusChange @printer[target]
+    if target.type == 'part' and data.status?
+      @_onPartStatusChange @printer[target]
     @cli.render()
 
   _onClose: =>
@@ -214,20 +214,24 @@ class Tegh
     @cli.rl.prompt()
     @cli.render()
 
-  _onJobStatusChange: (job) =>
-    msg = "#{job.status.capitalize()} #{job.file_name}"
-    color = if job.status == "estopped" then "yellow" else "green"
+  _onPartStatusChange: (part) =>
+    msg = "#{part.status.capitalize()} #{part.file_name}"
+    color = if part.status == "estopped" then "yellow" else "green"
     stdout.write "\r" + msg[color]
     console.log()
     @cli.rl.prompt()
 
-  _jobs: =>
-    jobs = []
-    jobs = Object.findAll @printer, (k, v) -> k.startsWith /jobs\[[0-9]+\]$/
-    jobs = Object.values jobs
+  parts: =>
+    parts = []
+    parts = Object.findAll @printer, (k, v) ->
+      return false unless v.type == 'part'
+      v.id = k
+      return true
+    parts = Object.values(parts).sortBy 'position'
+    return parts
 
-  _listJobs: =>
-    jobs = @_jobs()
+  _listParts: =>
+    parts = @parts()
 
     @cli.rl.pause()
     stdout.write("\r")
@@ -238,48 +242,44 @@ class Tegh
     colWidths = [        8,     25,                11,       7,    10,      10    ]
     colWidths.unshift @cli.width - 8 - colWidths.sum()
     table = new Table
-      head:     ['Job', 'Qty', 'Slicing Profile', 'Status', 'Id', 'Start', 'Elapsed']
+      head:     ['Part', 'Qty', 'Quality', 'Status', 'Id', 'Start', 'Elapsed']
       colWidths: colWidths
       style: { 'padding-left': 1, 'padding-right': 1 }
 
     i = 0
-    for job in jobs.sortBy 'position'
-      @_printJob table, job, (if job.status == 'printing' then i else i++)
-    if jobs.length == 0
+    for part in parts
+      @_printPart table, part, (if part.status == 'printing' then i else i++)
+    if parts.length == 0
       @_append "  There are no jobs in the print queue."
     else
       console.log table.toString()
 
-  _jobAttrStrings: (job, i) ->
-    prefix: "#{i}) #{job.file_name} "
-    id: job.id.pad(5)
-    status: job.status?.capitalize?()
-    profile:
-      if job.file_name.endsWith(/\.ngc|\.gcode/)
+  _partAttrStrings: (part, i) ->
+    prefix: "#{i}) #{part.file_name} "
+    id: part.id
+    status: part.status?.capitalize?()
+    quality:
+      if part.file_name.endsWith(/\.ngc|\.gcode/)
         "N/A"
       else
-        """
-        #{job.slicing_engine||@printer.slicing_engine} / 
-        #{job.slicing_profile||@printer.slicing_profile}
-        """.replace('\n', '').titleize()
+        part.quality.titleize()
     start:
-      if job.start_time?
-        (new Date(job.start_time)).format('{12hr}:{mm} {TT}')
+      if part.start_time?
+        (new Date(part.start_time)).format('{12hr}:{mm} {TT}')
       else
         "N/A"
     elapsed:
-      if job.status == 'printing'
-        @_formatTime new Date() - new Date(job.start_time)
+      if part.status == 'printing'
+        @_formatTime new Date() - new Date(part.start_time)
       else
         "N/A"
-    qty: "#{job.qty_printed}/#{job.qty}"
+    qty: "#{part.qty_printed}/#{part.qty}"
 
-  _printJob: (table, job, i) =>
-    if job.status == 'printing' then i = "X"
-    keys = ['prefix', 'qty', 'profile', 'status', 'id', 'start', 'elapsed']
-    attrs = @_jobAttrStrings(job, i)
-    console.log job
-    # color = if job.status == 'printing' then "\x1b[32m" else ""
+  _printPart: (table, part, i) =>
+    if part.status == 'printing' then i = "X"
+    keys = ['prefix', 'qty', 'quality', 'status', 'id', 'start', 'elapsed']
+    attrs = @_partAttrStrings(part, i)
+    # color = if part.status == 'printing' then "\x1b[32m" else ""
     # table.push keys.map (k) -> v = "#{color}#{attrs[k]}\x1b[\x1b[0m"
     table.push keys.map (k) -> v = attrs[k]
 
@@ -318,21 +318,17 @@ class Tegh
       fields.push s
     fields.join("  ")
 
-
-  jobs: =>
-    Object.values Object.select @printer, /^jobs\[/
-
   _rHeader: ->
     status = "Status: #{@printer.state.status.capitalize()} "
     return status if @printer.state.status != "printing"
     total = 0
     current = 0
     startTime = Number.MAX_VALUE
-    for job in @jobs()
-      continue unless job.status == "printing"
-      total += job.total_lines || 0
-      current += job.current_line || 0
-      startTime = new Date(job.start_time) if job.start_time < startTime
+    for part in @printer.parts()
+      continue unless part.status == "printing"
+      total += part.total_lines || 0
+      current += part.current_line || 0
+      startTime = new Date(part.start_time) if part.start_time < startTime
     status += "( #{((100*current / total) || 0).format(2)}% ) "
 
     if startTime < Number.MAX_VALUE
@@ -352,12 +348,12 @@ class Tegh
     percent = "#{if p > 10 then "" else " "}#{p.round(1)}"
     c = @cli.cursor
     c.hide().goto(0, @cli.height+1).write "Uploading [#{bar}] #{percent}%"
-    @_renderJobUploadNotice() if p == 100
+    @_renderUploadNotice() if p == 100
 
-  _renderJobUploadNotice: =>
-    jobCount = @_jobs().length
-    are = if jobCount == 1 then "is" else "are"
-    text = "Uploaded. There #{are} #{jobCount||"no"} print jobs ahead of yours"
+  _renderUploadNotice: =>
+    partCount = @parts().length
+    are = if partCount == 1 then "is" else "are"
+    text = "Uploaded. There #{are} #{partCount||"no"} print jobs ahead of yours"
     console.log "\n#{text}"
 
 
@@ -373,7 +369,7 @@ class Tegh
       @_uploading = true
 
     if cmd == "help" then @_appendHelp(words[0])
-    else if cmd == "get_jobs" then @_listJobs()
+    else if cmd == "get_jobs" then @_listParts()
     else if cmd == "exit" then process.exit()
     else
       try
@@ -515,7 +511,7 @@ class Tegh
     dir = "./" if dir.length == 0
     [absPath, out] = dirAutocomplete dir, @_fileTypes
 
-    # If there is only 1 result set the current REPL line to it's 
+    # If there is only 1 result set the current REPL line to it's
     # value.
     if out.length < 2
       out[0] = ""
