@@ -2,7 +2,7 @@ dgram = require('dgram')
 dns = require('native-dns')
 UDPSocket = require('native-dns/lib/utils').UDPSocket
 DnsPacket = require('native-dns/lib/packet')
-consts = require('native-dns/lib/consts')
+consts = require('native-dns-packet/consts')
 util = require('util')
 net = require('net')
 EventEmitter = require('events').EventEmitter
@@ -41,7 +41,7 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     setTimeout(@_close.fill(@_sockets), 2000)
 
   _makeMdnsRequest: (type, address) =>
-    server = 
+    server =
       port: @mdnsServer.port
       type: @mdnsServer.type
       address: address
@@ -58,7 +58,10 @@ module.exports = class DnsSdDiscoverer extends EventEmitter
     packet.timeout = 2000
     packet.header.id = random_integer()
     packet.header.rd = 1
-    packet.question.push(req.question)
+    packet.answer = []
+    packet.additional = []
+    packet.authority = []
+    packet.question = [req.question]
 
     dg.on "message", @_onMessage
 

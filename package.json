@@ -21,6 +21,7 @@
     , "touch": "*"
     , "flavored-path": "*"
     , "native-dns": "git+https://github.com/D1plo1d/node-dns.git"
+    , "native-dns-packet": "*"
     , "exec-sync": "*"
     , "prompt": "*"
     , "mocha": "*"
